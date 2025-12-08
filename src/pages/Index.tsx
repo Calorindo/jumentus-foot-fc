@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useFirebaseData } from '@/hooks/useFirebase';
+import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, incrementPlayerGoal } from '@/services/addPlayer';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import PlayerForm from '@/components/PlayerForm';
@@ -11,43 +12,52 @@ import { toast } from 'sonner';
 import type { Player, Team } from '@/types/player';
 
 const Index = () => {
-  const [players, setPlayers] = useLocalStorage<Player[]>('pelada-players', []);
+  const { data: playersData } = useFirebaseData<Record<string, Player>>('players');
+  const players = playersData ? Object.values(playersData) : [];
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team } | null>(null);
 
-  const generateId = () => Math.random().toString(36).substring(2, 9);
-
   const addPlayer = useCallback(
-    (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
-      const newPlayer: Player = {
-        ...playerData,
-        id: generateId(),
-        goals: 0,
-        saves: 0,
-      };
-      setPlayers((prev) => [...prev, newPlayer]);
-      toast.success(`${playerData.name} adicionado!`);
+    async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
+      try {
+        await createPlayer(playerData.name, playerData.skillLevel, playerData.isGoalkeeper);
+        toast.success(`${playerData.name} adicionado!`);
+      } catch (error) {
+        toast.error('Erro ao adicionar jogador');
+      }
     },
-    [setPlayers]
+    []
   );
 
   const updatePlayer = useCallback(
-    (player: Player) => {
-      setPlayers((prev) => prev.map((p) => (p.id === player.id ? player : p)));
-      setEditingPlayer(null);
-      toast.success(`${player.name} atualizado!`);
+    async (player: Player) => {
+      try {
+        await updatePlayerStats(player.id, {
+          name: player.name,
+          skill_level: player.skillLevel,
+          is_goalkeeper: player.isGoalkeeper
+        });
+        setEditingPlayer(null);
+        toast.success(`${player.name} atualizado!`);
+      } catch (error) {
+        toast.error('Erro ao atualizar jogador');
+      }
     },
-    [setPlayers]
+    []
   );
 
   const deletePlayer = useCallback(
-    (id: string) => {
-      const player = players.find((p) => p.id === id);
-      setPlayers((prev) => prev.filter((p) => p.id !== id));
-      toast.success(`${player?.name} removido!`);
+    async (id: string) => {
+      try {
+        const player = players.find((p) => p.id === id);
+        await deletePlayerFromDB(id);
+        toast.success(`${player?.name} removido!`);
+      } catch (error) {
+        toast.error('Erro ao remover jogador');
+      }
     },
-    [players, setPlayers]
+    [players]
   );
 
   const handleTeamsCreated = useCallback((teamA: Team, teamB: Team) => {
@@ -57,12 +67,13 @@ const Index = () => {
   }, []);
 
   const handleGoal = useCallback(
-    (teamName: string, playerId: string) => {
+    async (teamName: string, playerId: string) => {
       if (!currentMatch) return;
 
-      setPlayers((prev) =>
-        prev.map((p) => (p.id === playerId ? { ...p, goals: p.goals + 1 } : p))
-      );
+      const player = players.find((p) => p.id === playerId);
+      if (player) {
+        await incrementPlayerGoal(playerId, player.goals + 1);
+      }
 
       setCurrentMatch((prev) => {
         if (!prev) return null;
@@ -72,22 +83,21 @@ const Index = () => {
         return { ...prev, teamB: { ...prev.teamB, score: prev.teamB.score + 1 } };
       });
 
-      const player = players.find((p) => p.id === playerId);
       toast.success(`⚽ GOL! ${player?.name}`);
     },
-    [currentMatch, players, setPlayers]
+    [currentMatch, players]
   );
 
   const handleSave = useCallback(
-    (teamName: string, playerId: string) => {
-      setPlayers((prev) =>
-        prev.map((p) => (p.id === playerId ? { ...p, saves: p.saves + 1 } : p))
-      );
-
+    async (teamName: string, playerId: string) => {
       const player = players.find((p) => p.id === playerId);
+      if (player) {
+        await updatePlayerStats(playerId, { saves: player.saves + 1 });
+      }
+
       toast.success(`🧤 Defesa! ${player?.name}`);
     },
-    [players, setPlayers]
+    [players]
   );
 
   const handleEndMatch = useCallback(() => {

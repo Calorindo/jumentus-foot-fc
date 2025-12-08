@@ -6,52 +6,52 @@
 
 @layer base {
   :root {
-    --background: 30 20% 98%;
-    --foreground: 350 30% 15%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 350 30% 15%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 350 30% 15%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 350 55% 32%;
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 350 20% 92%;
-    --secondary-foreground: 350 55% 32%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 30 15% 94%;
-    --muted-foreground: 350 15% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 42 80% 55%;
-    --accent-foreground: 350 30% 15%;
+    --accent: 45 100% 50%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 350 20% 88%;
-    --input: 350 20% 88%;
-    --ring: 350 55% 32%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
 
     --radius: 0.75rem;
 
-    /* Custom tokens */
-    --burgundy: 350 55% 32%;
-    --burgundy-light: 350 40% 45%;
-    --burgundy-dark: 350 60% 22%;
-    --gold: 42 80% 55%;
-    --gold-light: 42 70% 70%;
+    /* Custom tokens - Juventus colors */
+    --juventus-black: 0 0% 0%;
+    --juventus-white: 0 0% 100%;
+    --juventus-yellow: 45 100% 50%;
+    --juventus-yellow-light: 45 100% 65%;
+    --juventus-gray: 0 0% 20%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--burgundy-dark)) 0%, hsl(var(--burgundy)) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(var(--burgundy-dark)) 0%, hsl(var(--burgundy)) 50%, hsl(var(--burgundy-light)) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(var(--juventus-black)) 0%, hsl(var(--juventus-gray)) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(var(--juventus-black)) 0%, hsl(var(--juventus-gray)) 50%, hsl(var(--juventus-black)) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(var(--juventus-yellow)) 0%, hsl(var(--juventus-yellow-light)) 100%);
 
     /* Shadows */
-    --shadow-card: 0 4px 20px -4px hsl(var(--burgundy) / 0.15);
-    --shadow-elevated: 0 8px 30px -8px hsl(var(--burgundy) / 0.25);
-    --shadow-glow: 0 0 30px hsl(var(--gold) / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(var(--juventus-black) / 0.15);
+    --shadow-elevated: 0 8px 30px -8px hsl(var(--juventus-black) / 0.25);
+    --shadow-glow: 0 0 30px hsl(var(--juventus-yellow) / 0.4);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -64,37 +64,39 @@
   }
 
   .dark {
-    --background: 350 30% 8%;
-    --foreground: 30 20% 95%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 100%;
 
-    --card: 350 25% 12%;
-    --card-foreground: 30 20% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 350 25% 12%;
-    --popover-foreground: 30 20% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 350 50% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 350 25% 18%;
-    --secondary-foreground: 30 20% 90%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 350 20% 18%;
-    --muted-foreground: 30 15% 60%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 42 80% 55%;
-    --accent-foreground: 350 30% 10%;
+    --accent: 45 100% 50%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 350 20% 20%;
-    --input: 350 20% 20%;
-    --ring: 350 50% 45%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 45 100% 50%;
 
-    --burgundy: 350 50% 45%;
-    --burgundy-light: 350 45% 55%;
-    --burgundy-dark: 350 55% 25%;
+    --juventus-black: 0 0% 0%;
+    --juventus-white: 0 0% 100%;
+    --juventus-yellow: 45 100% 50%;
+    --juventus-yellow-light: 45 100% 65%;
+    --juventus-gray: 0 0% 30%;
   }
 }
 
