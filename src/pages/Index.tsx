@@ -27,7 +27,7 @@ const Index = () => {
   const addPlayer = useCallback(
     async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
       try {
-        await createPlayer(playerData.name, playerData.skillLevel, playerData.isGoalkeeper);
+        await createPlayer(playerData.name, playerData.skillLevel, playerData.isGoalkeeper, playerData.position);
         toast.success(`${playerData.name} adicionado!`);
       } catch (error) {
         toast.error('Erro ao adicionar jogador');
@@ -47,6 +47,7 @@ const Index = () => {
           name: player.name,
           skill_level: player.skillLevel,
           is_goalkeeper: player.isGoalkeeper,
+          position: player.position,
           active: player.active,
           goals: player.goals,
           assists: player.assists,

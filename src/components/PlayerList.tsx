@@ -88,12 +88,13 @@ const PlayerList = ({
               <span className="font-semibold text-foreground truncate">
                 {player.name}
               </span>
-              {player.isGoalkeeper && (
-                <Badge variant="outline" className="text-xs border-primary text-primary">
-                  <Shield className="w-3 h-3 mr-1" />
-                  Goleiro
-                </Badge>
-              )}
+              <Badge variant="outline" className="text-xs border-primary text-primary">
+                {player.position === 'Goleiro' && '🧤'}
+                {player.position === 'Zagueiro' && '🛡️'}
+                {player.position === 'Meio Campo' && '⚙️'}
+                {player.position === 'Atacante' && '⚽'}
+                {' '}{player.position}
+              </Badge>
             </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">

@@ -154,7 +154,7 @@ const MatchControl = ({ teamA, teamB, onGoal, onAssist, onSave, onEndMatch, onAd
                     <Plus className="w-3 h-3" />
                   </Button>
                 )}
-                {player.isGoalkeeper && (
+                {(player.position === 'Goleiro' || player.position === 'Zagueiro') && (
                   <>
                     {isAdmin && onAdjustSaves && (
                       <Button

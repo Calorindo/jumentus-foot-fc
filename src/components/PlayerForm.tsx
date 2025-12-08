@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Player } from '@/types/player';
+import type { Player, PlayerPosition } from '@/types/player';
 
 interface PlayerFormProps {
   onAddPlayer: (player: Omit<Player, 'id' | 'goals' | 'saves'>) => void;
@@ -20,6 +21,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   const [name, setName] = useState('');
   const [skillLevel, setSkillLevel] = useState(5);
   const [isGoalkeeper, setIsGoalkeeper] = useState(false);
+  const [position, setPosition] = useState<PlayerPosition>('Atacante');
   const [isActive, setIsActive] = useState(true);
   const [goals, setGoals] = useState(0);
   const [assists, setAssists] = useState(0);
@@ -30,6 +32,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setName(editingPlayer.name);
       setSkillLevel(editingPlayer.skillLevel);
       setIsGoalkeeper(editingPlayer.isGoalkeeper);
+      setPosition(editingPlayer.position);
       setIsActive(editingPlayer.active ?? true);
       setGoals(editingPlayer.goals);
       setAssists(editingPlayer.assists);
@@ -38,6 +41,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setName('');
       setSkillLevel(5);
       setIsGoalkeeper(false);
+      setPosition('Atacante');
       setIsActive(true);
       setGoals(0);
       setAssists(0);
@@ -55,6 +59,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         name: name.trim(),
         skillLevel,
         isGoalkeeper,
+        position,
         active: isActive,
         goals,
         assists,
@@ -65,12 +70,14 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         name: name.trim(),
         skillLevel,
         isGoalkeeper,
+        position,
       });
     }
 
     setName('');
     setSkillLevel(5);
     setIsGoalkeeper(false);
+    setPosition('Atacante');
     setIsActive(true);
     setGoals(0);
     setAssists(0);
@@ -115,15 +122,22 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-          <Label htmlFor="goalkeeper" className="text-foreground font-medium cursor-pointer">
-            🧤 Goleiro
-          </Label>
-          <Switch
-            id="goalkeeper"
-            checked={isGoalkeeper}
-            onCheckedChange={setIsGoalkeeper}
-          />
+        <div>
+          <Label className="text-foreground font-medium">Posição</Label>
+          <Select value={position} onValueChange={(value) => {
+            setPosition(value as PlayerPosition);
+            setIsGoalkeeper(value === 'Goleiro');
+          }}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Goleiro">🧤 Goleiro</SelectItem>
+              <SelectItem value="Zagueiro">🛡️ Zagueiro</SelectItem>
+              <SelectItem value="Meio Campo">⚙️ Meio Campo</SelectItem>
+              <SelectItem value="Atacante">⚽ Atacante</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {editingPlayer && (

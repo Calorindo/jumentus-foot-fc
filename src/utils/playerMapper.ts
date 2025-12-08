@@ -8,6 +8,7 @@ interface FirebasePlayer {
   assists: number;
   saves: number;
   is_goalkeeper: boolean;
+  position: string;
   active: boolean;
 }
 
@@ -20,6 +21,7 @@ export function mapFirebaseToPlayer(data: FirebasePlayer): Player {
     assists: data.assists ?? 0,
     saves: data.saves,
     isGoalkeeper: data.is_goalkeeper,
+    position: (data.position ?? 'Atacante') as any,
     active: data.active ?? true,
   };
 }

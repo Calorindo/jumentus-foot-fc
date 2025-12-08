@@ -1,3 +1,5 @@
+export type PlayerPosition = 'Goleiro' | 'Zagueiro' | 'Meio Campo' | 'Atacante';
+
 export interface Player {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export interface Player {
   assists: number;
   saves: number;
   isGoalkeeper: boolean;
+  position: PlayerPosition;
   active: boolean;
 }
 
