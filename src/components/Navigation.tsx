@@ -13,7 +13,7 @@ const Navigation = ({ activeTab, onTabChange, matchActive, votingActive = false 
     { id: 'players', label: 'Jogadores', icon: Users },
     { id: 'teams', label: 'Times', icon: Shuffle },
     { id: 'match', label: 'Partida', icon: Gamepad2, disabled: !matchActive },
-    { id: 'voting', label: 'Votação', icon: Award, hidden: !votingActive },
+    { id: 'voting', label: 'Votação', icon: Award },
     { id: 'stats', label: 'Estatísticas', icon: BarChart3 },
   ];
 

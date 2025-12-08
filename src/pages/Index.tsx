@@ -25,7 +25,6 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team } | null>(null);
-  const [votingMatchId, setVotingMatchId] = useState<string | null>(null);
 
   const addPlayer = useCallback(
     async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
@@ -236,7 +235,7 @@ const Index = () => {
           : 'Empate';
       
       try {
-        const matchId = await saveMatch(
+        await saveMatch(
           currentMatch.teamA.name,
           currentMatch.teamA.score,
           currentMatch.teamA.players,
@@ -245,7 +244,6 @@ const Index = () => {
           currentMatch.teamB.players
         );
         
-        setVotingMatchId(matchId);
         setActiveTab('voting');
         
         toast.success(
@@ -267,7 +265,7 @@ const Index = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         matchActive={!!currentMatch}
-        votingActive={!!votingMatchId}
+        votingActive={true}
       />
 
       <main className="container mx-auto py-4 sm:py-6 px-4">
@@ -314,15 +312,7 @@ const Index = () => {
 
         {activeTab === 'stats' && <Statistics players={activePlayers} />}
 
-        {activeTab === 'voting' && votingMatchId && (
-          <MatchVoting 
-            matchId={votingMatchId} 
-            onClose={() => {
-              setVotingMatchId(null);
-              setActiveTab('stats');
-            }}
-          />
-        )}
+        {activeTab === 'voting' && <MatchVoting />}
       </main>
     </div>
   );

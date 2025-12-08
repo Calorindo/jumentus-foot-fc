@@ -61,6 +61,23 @@ export async function getMatch(matchId: string): Promise<MatchData | null> {
   return null;
 }
 
+export async function getRecentMatches(): Promise<MatchData[]> {
+  const matchesRef = ref(database, 'matches');
+  const snapshot = await get(matchesRef);
+  
+  if (snapshot.exists()) {
+    const matches = Object.values(snapshot.val()) as MatchData[];
+    return matches.sort((a, b) => b.endedAt - a.endedAt).slice(0, 10);
+  }
+  return [];
+}
+
+export function canVote(match: MatchData): boolean {
+  const twoHoursInMs = 2 * 60 * 60 * 1000;
+  const now = Date.now();
+  return (now - match.endedAt) < twoHoursInMs;
+}
+
 export async function voteForPlayer(matchId: string, playerId: string): Promise<void> {
   const voteRef = ref(database, `matches/${matchId}/votes/${playerId}`);
   const snapshot = await get(voteRef);
