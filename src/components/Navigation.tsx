@@ -30,7 +30,7 @@ const Navigation = ({ activeTab, onTabChange, matchActive }: NavigationProps) =>
                 variant="ghost"
                 onClick={() => !isDisabled && onTabChange(tab.id)}
                 disabled={isDisabled}
-                className={`flex-1 min-w-[80px] rounded-none py-4 px-3 font-medium transition-all ${
+                className={`flex-1 min-w-[70px] sm:min-w-[80px] rounded-none py-3 sm:py-4 px-2 sm:px-3 font-medium transition-all ${
                   isActive
                     ? 'text-primary border-b-2 border-primary bg-secondary/50'
                     : isDisabled
@@ -38,10 +38,10 @@ const Navigation = ({ activeTab, onTabChange, matchActive }: NavigationProps) =>
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'
                 }`}
               >
-                <Icon className="w-4 h-4 mr-2" />
-                <span className="text-sm">{tab.label}</span>
+                <Icon className="w-4 h-4 sm:mr-2" />
+                <span className="text-xs sm:text-sm hidden sm:inline">{tab.label}</span>
                 {tab.id === 'match' && matchActive && (
-                  <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="ml-1 sm:ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 )}
               </Button>
             );

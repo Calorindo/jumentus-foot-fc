@@ -72,9 +72,9 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
           return (
             <div
               key={player.id}
-              className="flex items-center gap-2 p-2 bg-secondary rounded-lg"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-2 bg-secondary rounded-lg"
             >
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 w-full">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm truncate">{player.name}</span>
                   {player.isGoalkeeper && <Shield className="w-3 h-3 text-primary" />}
@@ -88,7 +88,7 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
                 </div>
               </div>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 w-full sm:w-auto">
                 {isAdmin && onAdjustGoals && (
                   <Button
                     size="sm"
@@ -102,7 +102,7 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
                 <Button
                   size="sm"
                   onClick={() => handleGoal(team, player)}
-                  className="h-8 px-2 bg-primary hover:bg-primary/80"
+                  className="h-8 px-2 bg-primary hover:bg-primary/80 flex-1 sm:flex-none"
                 >
                   <Goal className="w-4 h-4" />
                 </Button>
@@ -132,7 +132,7 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
                       size="sm"
                       variant="outline"
                       onClick={() => handleSave(team, player)}
-                      className="h-8 px-2"
+                      className="h-8 px-2 flex-1 sm:flex-none"
                     >
                       🧤
                     </Button>
@@ -158,17 +158,17 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="card-elevated p-6 gradient-hero text-primary-foreground text-center">
-        <h2 className="font-display text-3xl mb-2">PLACAR AO VIVO</h2>
-        <div className="flex items-center justify-center gap-8">
+      <div className="card-elevated p-4 sm:p-6 gradient-hero text-primary-foreground text-center">
+        <h2 className="font-display text-xl sm:text-2xl md:text-3xl mb-2">PLACAR AO VIVO</h2>
+        <div className="flex items-center justify-center gap-4 sm:gap-8">
           <div className="text-center">
-            <div className="font-display text-5xl">{teamA.score}</div>
-            <div className="text-sm opacity-80">{teamA.name}</div>
+            <div className="font-display text-3xl sm:text-4xl md:text-5xl">{teamA.score}</div>
+            <div className="text-xs sm:text-sm opacity-80 truncate max-w-[80px] sm:max-w-none">{teamA.name}</div>
           </div>
-          <div className="font-display text-3xl opacity-50">×</div>
+          <div className="font-display text-2xl sm:text-3xl opacity-50">×</div>
           <div className="text-center">
-            <div className="font-display text-5xl">{teamB.score}</div>
-            <div className="text-sm opacity-80">{teamB.name}</div>
+            <div className="font-display text-3xl sm:text-4xl md:text-5xl">{teamB.score}</div>
+            <div className="text-xs sm:text-sm opacity-80 truncate max-w-[80px] sm:max-w-none">{teamB.name}</div>
           </div>
         </div>
 

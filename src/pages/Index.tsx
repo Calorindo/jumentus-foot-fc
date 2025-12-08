@@ -212,9 +212,9 @@ const Index = () => {
         matchActive={!!currentMatch}
       />
 
-      <main className="container mx-auto py-6 px-4">
+      <main className="container mx-auto py-4 sm:py-6 px-4">
         {activeTab === 'players' && (
-          <div className="grid md:grid-cols-[350px_1fr] gap-6">
+          <div className="grid lg:grid-cols-[350px_1fr] gap-4 sm:gap-6">
             <PlayerForm
               onAddPlayer={addPlayer}
               editingPlayer={editingPlayer}

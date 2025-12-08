@@ -161,12 +161,12 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
       </div>
 
       {selectedIds.length >= 2 && (
-        <div className="flex gap-2 justify-center">
-          <Button onClick={balanceTeams} className="btn-primary">
+        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+          <Button onClick={balanceTeams} className="btn-primary w-full sm:w-auto">
             <Sparkles className="w-4 h-4 mr-2" />
             Equilibrar Times
           </Button>
-          <Button onClick={shuffleTeams} variant="outline">
+          <Button onClick={shuffleTeams} variant="outline" className="w-full sm:w-auto">
             <Shuffle className="w-4 h-4 mr-2" />
             Sortear
           </Button>
@@ -178,17 +178,17 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
           <h3 className="font-display text-lg text-primary mb-3">Distribuir Manualmente</h3>
           <div className="space-y-2">
             {unassignedPlayers.map((player) => (
-              <div key={player.id} className="flex items-center justify-between p-2 bg-secondary rounded">
+              <div key={player.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2 bg-secondary rounded">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{player.name}</span>
+                  <span className="font-medium text-sm">{player.name}</span>
                   {player.isGoalkeeper && <Badge variant="outline" className="text-xs">🧤</Badge>}
-                  <Badge variant="outline">{player.skillLevel}</Badge>
+                  <Badge variant="outline" className="text-xs">{player.skillLevel}</Badge>
                 </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={() => moveToTeamA(player)}>
+                <div className="flex gap-1 w-full sm:w-auto">
+                  <Button size="sm" variant="outline" onClick={() => moveToTeamA(player)} className="flex-1 sm:flex-none">
                     <UserPlus className="w-3 h-3 mr-1" /> Time A
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => moveToTeamB(player)}>
+                  <Button size="sm" variant="outline" onClick={() => moveToTeamB(player)} className="flex-1 sm:flex-none">
                     <UserPlus className="w-3 h-3 mr-1" /> Time B
                   </Button>
                 </div>
