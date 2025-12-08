@@ -123,6 +123,18 @@ const Index = () => {
     [currentMatch, allPlayers]
   );
 
+  const handleAssist = useCallback(
+    async (teamName: string, playerId: string) => {
+      const player = allPlayers.find((p) => p.id === playerId);
+      if (player) {
+        await updatePlayerStats(playerId, { assists: player.assists + 1 });
+      }
+
+      toast.success(`🎯 Assistência! ${player?.name}`);
+    },
+    [allPlayers]
+  );
+
   const handleSave = useCallback(
     async (teamName: string, playerId: string) => {
       const player = allPlayers.find((p) => p.id === playerId);
@@ -169,6 +181,20 @@ const Index = () => {
       }
     },
     [allPlayers, isAdmin, currentMatch]
+  );
+
+  const handleAdjustAssists = useCallback(
+    async (playerId: string, delta: number) => {
+      if (!isAdmin) return;
+      
+      const player = allPlayers.find((p) => p.id === playerId);
+      if (player) {
+        const newAssists = Math.max(0, player.assists + delta);
+        await updatePlayerStats(playerId, { assists: newAssists });
+        toast.success(`Assistências de ${player.name}: ${newAssists}`);
+      }
+    },
+    [allPlayers, isAdmin]
   );
 
   const handleAdjustSaves = useCallback(
@@ -246,9 +272,11 @@ const Index = () => {
             teamA={currentMatch.teamA}
             teamB={currentMatch.teamB}
             onGoal={handleGoal}
+            onAssist={handleAssist}
             onSave={handleSave}
             onEndMatch={handleEndMatch}
             onAdjustGoals={handleAdjustGoals}
+            onAdjustAssists={handleAdjustAssists}
             onAdjustSaves={handleAdjustSaves}
           />
         )}

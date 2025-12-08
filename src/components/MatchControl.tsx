@@ -9,20 +9,28 @@ interface MatchControlProps {
   teamA: Team;
   teamB: Team;
   onGoal: (teamName: string, playerId: string) => void;
+  onAssist: (teamName: string, playerId: string) => void;
   onSave: (teamName: string, playerId: string) => void;
   onEndMatch: () => void;
   onAdjustGoals?: (playerId: string, delta: number) => void;
+  onAdjustAssists?: (playerId: string, delta: number) => void;
   onAdjustSaves?: (playerId: string, delta: number) => void;
 }
 
-const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals, onAdjustSaves }: MatchControlProps) => {
+const MatchControl = ({ teamA, teamB, onGoal, onAssist, onSave, onEndMatch, onAdjustGoals, onAdjustAssists, onAdjustSaves }: MatchControlProps) => {
   const { isAdmin } = useAuth();
   const [matchGoals, setMatchGoals] = useState<{ teamName: string; playerId: string; playerName: string }[]>([]);
+  const [matchAssists, setMatchAssists] = useState<{ teamName: string; playerId: string; playerName: string }[]>([]);
   const [matchSaves, setMatchSaves] = useState<{ teamName: string; playerId: string; playerName: string }[]>([]);
 
   const handleGoal = (team: Team, player: Player) => {
     onGoal(team.name, player.id);
     setMatchGoals((prev) => [...prev, { teamName: team.name, playerId: player.id, playerName: player.name }]);
+  };
+
+  const handleAssist = (team: Team, player: Player) => {
+    onAssist(team.name, player.id);
+    setMatchAssists((prev) => [...prev, { teamName: team.name, playerId: player.id, playerName: player.name }]);
   };
 
   const handleSave = (team: Team, player: Player) => {
@@ -32,8 +40,9 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
 
   const getPlayerMatchStats = (playerId: string) => {
     const goals = matchGoals.filter((g) => g.playerId === playerId).length;
+    const assists = matchAssists.filter((a) => a.playerId === playerId).length;
     const saves = matchSaves.filter((s) => s.playerId === playerId).length;
-    return { goals, saves };
+    return { goals, assists, saves };
   };
 
   const getMVP = () => {
@@ -43,7 +52,7 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
 
     allPlayers.forEach((player) => {
       const stats = getPlayerMatchStats(player.id);
-      const points = stats.goals * 2 + stats.saves;
+      const points = stats.goals * 2 + stats.assists + stats.saves;
       if (points > maxPoints) {
         maxPoints = points;
         mvp = player;
@@ -78,12 +87,13 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-sm truncate">{player.name}</span>
                   {player.isGoalkeeper && <Shield className="w-3 h-3 text-primary" />}
-                  {mvp?.id === player.id && stats.goals + stats.saves > 0 && (
+                  {mvp?.id === player.id && stats.goals + stats.assists + stats.saves > 0 && (
                     <Trophy className="w-4 h-4 text-gold animate-bounce-soft" />
                   )}
                 </div>
                 <div className="flex gap-2 text-xs text-muted-foreground">
                   {stats.goals > 0 && <span>⚽ {stats.goals}</span>}
+                  {stats.assists > 0 && <span>🎯 {stats.assists}</span>}
                   {stats.saves > 0 && <span>🧤 {stats.saves}</span>}
                 </div>
               </div>
@@ -111,6 +121,34 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals,
                     size="sm"
                     variant="ghost"
                     onClick={() => onAdjustGoals(player.id, 1)}
+                    className="h-8 w-8 p-0 text-green-600 hover:text-green-600"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                )}
+                {isAdmin && onAdjustAssists && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onAdjustAssists(player.id, -1)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Minus className="w-3 h-3" />
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleAssist(team, player)}
+                  className="h-8 px-2 flex-1 sm:flex-none"
+                >
+                  🎯
+                </Button>
+                {isAdmin && onAdjustAssists && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onAdjustAssists(player.id, 1)}
                     className="h-8 w-8 p-0 text-green-600 hover:text-green-600"
                   >
                     <Plus className="w-3 h-3" />
