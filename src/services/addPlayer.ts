@@ -10,12 +10,23 @@ export interface Player {
   saves: number;
   is_goalkeeper: boolean;
   position: string;
+  weight?: number;
+  height?: number;
+  preferred_foot?: string;
   created_at: number;
   updated_at: number;
   active: boolean;
 }
 
-export async function createPlayer(name: string, skill: number, is_goalkeeper = false, position = 'Atacante') {
+export async function createPlayer(
+  name: string, 
+  skill: number, 
+  is_goalkeeper = false, 
+  position = 'Atacante',
+  weight?: number,
+  height?: number,
+  preferred_foot?: string
+) {
   const newPlayerRef = push(ref(database, 'players'));
   const id = newPlayerRef.key!;
   const now = Date.now();
@@ -29,6 +40,9 @@ export async function createPlayer(name: string, skill: number, is_goalkeeper = 
     saves: 0,
     is_goalkeeper: is_goalkeeper,
     position: position,
+    weight: weight,
+    height: height,
+    preferred_foot: preferred_foot,
     created_at: now,
     updated_at: now,
     active: true

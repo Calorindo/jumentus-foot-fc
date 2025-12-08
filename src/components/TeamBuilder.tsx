@@ -39,12 +39,33 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
     return (team.reduce((sum, p) => sum + p.skillLevel, 0) / team.length).toFixed(1);
   };
 
+  const calculatePlayerScore = (player: Player) => {
+    let score = player.skillLevel * 10;
+    
+    // Bonus por posição
+    if (player.position === 'Goleiro') score += 5;
+    if (player.position === 'Zagueiro') score += 3;
+    
+    // Bonus por pé ambidestro
+    if (player.preferredFoot === 'Ambidestro') score += 2;
+    
+    // Bonus por altura (para goleiros e zagueiros)
+    if ((player.position === 'Goleiro' || player.position === 'Zagueiro') && player.height) {
+      if (player.height >= 185) score += 3;
+      else if (player.height >= 180) score += 1;
+    }
+    
+    return score;
+  };
+
   const balanceTeams = () => {
     const selected = players.filter((p) => selectedIds.includes(p.id));
     if (selected.length < 2) return;
 
     const goalkeepers = selected.filter(p => p.isGoalkeeper);
-    const fieldPlayers = selected.filter(p => !p.isGoalkeeper);
+    const defenders = selected.filter(p => p.position === 'Zagueiro');
+    const midfielders = selected.filter(p => p.position === 'Meio Campo');
+    const attackers = selected.filter(p => p.position === 'Atacante');
 
     if (goalkeepers.length === 1) {
       toast.error('Apenas 1 goleiro selecionado. Adicione mais jogadores ou distribua manualmente.');
@@ -54,32 +75,34 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
     const newTeamA: Player[] = [];
     const newTeamB: Player[] = [];
 
-    // Distribute goalkeepers first
+    // Distribute goalkeepers
     if (goalkeepers.length >= 2) {
-      const sortedGK = [...goalkeepers].sort((a, b) => b.skillLevel - a.skillLevel);
+      const sortedGK = [...goalkeepers].sort((a, b) => calculatePlayerScore(b) - calculatePlayerScore(a));
       sortedGK.forEach((gk, index) => {
-        if (index % 2 === 0) {
-          newTeamA.push(gk);
-        } else {
-          newTeamB.push(gk);
-        }
+        if (index % 2 === 0) newTeamA.push(gk);
+        else newTeamB.push(gk);
       });
     }
 
-    // Distribute field players
-    const sortedField = [...fieldPlayers].sort((a, b) => b.skillLevel - a.skillLevel);
-    let sumA = newTeamA.reduce((sum, p) => sum + p.skillLevel, 0);
-    let sumB = newTeamB.reduce((sum, p) => sum + p.skillLevel, 0);
+    // Distribute by position to balance team composition
+    const distributeByPosition = (positionPlayers: Player[]) => {
+      const sorted = [...positionPlayers].sort((a, b) => calculatePlayerScore(b) - calculatePlayerScore(a));
+      sorted.forEach((player) => {
+        const scoreA = newTeamA.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
+        const scoreB = newTeamB.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
+        
+        if (scoreA <= scoreB) newTeamA.push(player);
+        else newTeamB.push(player);
+      });
+    };
 
-    sortedField.forEach((player) => {
-      if (sumA <= sumB) {
-        newTeamA.push(player);
-        sumA += player.skillLevel;
-      } else {
-        newTeamB.push(player);
-        sumB += player.skillLevel;
-      }
-    });
+    distributeByPosition(defenders);
+    distributeByPosition(midfielders);
+    distributeByPosition(attackers);
+
+    // Balance preferred foot
+    const leftFootA = newTeamA.filter(p => p.preferredFoot === 'Esquerdo').length;
+    const leftFootB = newTeamB.filter(p => p.preferredFoot === 'Esquerdo').length;
 
     const gkInA = newTeamA.filter(p => p.isGoalkeeper).length;
     const gkInB = newTeamB.filter(p => p.isGoalkeeper).length;

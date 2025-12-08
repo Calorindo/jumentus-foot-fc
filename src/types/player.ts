@@ -1,4 +1,5 @@
 export type PlayerPosition = 'Goleiro' | 'Zagueiro' | 'Meio Campo' | 'Atacante';
+export type PreferredFoot = 'Direito' | 'Esquerdo' | 'Ambidestro';
 
 export interface Player {
   id: string;
@@ -9,6 +10,9 @@ export interface Player {
   saves: number;
   isGoalkeeper: boolean;
   position: PlayerPosition;
+  weight?: number;
+  height?: number;
+  preferredFoot?: PreferredFoot;
   active: boolean;
 }
 

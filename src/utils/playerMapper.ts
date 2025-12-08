@@ -9,6 +9,9 @@ interface FirebasePlayer {
   saves: number;
   is_goalkeeper: boolean;
   position: string;
+  weight?: number;
+  height?: number;
+  preferred_foot?: string;
   active: boolean;
 }
 
@@ -22,6 +25,9 @@ export function mapFirebaseToPlayer(data: FirebasePlayer): Player {
     saves: data.saves,
     isGoalkeeper: data.is_goalkeeper,
     position: (data.position ?? 'Atacante') as any,
+    weight: data.weight,
+    height: data.height,
+    preferredFoot: data.preferred_foot as any,
     active: data.active ?? true,
   };
 }

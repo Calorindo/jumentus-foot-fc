@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Player, PlayerPosition } from '@/types/player';
+import type { Player, PlayerPosition, PreferredFoot } from '@/types/player';
 
 interface PlayerFormProps {
   onAddPlayer: (player: Omit<Player, 'id' | 'goals' | 'saves'>) => void;
@@ -22,6 +22,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   const [skillLevel, setSkillLevel] = useState(5);
   const [isGoalkeeper, setIsGoalkeeper] = useState(false);
   const [position, setPosition] = useState<PlayerPosition>('Atacante');
+  const [weight, setWeight] = useState<number>();
+  const [height, setHeight] = useState<number>();
+  const [preferredFoot, setPreferredFoot] = useState<PreferredFoot>('Direito');
   const [isActive, setIsActive] = useState(true);
   const [goals, setGoals] = useState(0);
   const [assists, setAssists] = useState(0);
@@ -33,6 +36,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setSkillLevel(editingPlayer.skillLevel);
       setIsGoalkeeper(editingPlayer.isGoalkeeper);
       setPosition(editingPlayer.position);
+      setWeight(editingPlayer.weight);
+      setHeight(editingPlayer.height);
+      setPreferredFoot(editingPlayer.preferredFoot || 'Direito');
       setIsActive(editingPlayer.active ?? true);
       setGoals(editingPlayer.goals);
       setAssists(editingPlayer.assists);
@@ -42,6 +48,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setSkillLevel(5);
       setIsGoalkeeper(false);
       setPosition('Atacante');
+      setWeight(undefined);
+      setHeight(undefined);
+      setPreferredFoot('Direito');
       setIsActive(true);
       setGoals(0);
       setAssists(0);
@@ -60,6 +69,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         skillLevel,
         isGoalkeeper,
         position,
+        weight,
+        height,
+        preferredFoot,
         active: isActive,
         goals,
         assists,
@@ -71,6 +83,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         skillLevel,
         isGoalkeeper,
         position,
+        weight,
+        height,
+        preferredFoot,
       });
     }
 
@@ -78,6 +93,9 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setSkillLevel(5);
     setIsGoalkeeper(false);
     setPosition('Atacante');
+    setWeight(undefined);
+    setHeight(undefined);
+    setPreferredFoot('Direito');
     setIsActive(true);
     setGoals(0);
     setAssists(0);
@@ -136,6 +154,49 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
               <SelectItem value="Zagueiro">🛡️ Zagueiro</SelectItem>
               <SelectItem value="Meio Campo">⚙️ Meio Campo</SelectItem>
               <SelectItem value="Atacante">⚽ Atacante</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label htmlFor="weight" className="text-foreground font-medium">Peso (kg)</Label>
+            <Input
+              id="weight"
+              type="number"
+              min="40"
+              max="150"
+              value={weight || ''}
+              onChange={(e) => setWeight(e.target.value ? parseInt(e.target.value) : undefined)}
+              placeholder="70"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="height" className="text-foreground font-medium">Altura (cm)</Label>
+            <Input
+              id="height"
+              type="number"
+              min="150"
+              max="220"
+              value={height || ''}
+              onChange={(e) => setHeight(e.target.value ? parseInt(e.target.value) : undefined)}
+              placeholder="175"
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-foreground font-medium">Pé Preferido</Label>
+          <Select value={preferredFoot} onValueChange={(value) => setPreferredFoot(value as PreferredFoot)}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Direito">🦿 Direito</SelectItem>
+              <SelectItem value="Esquerdo">🦾 Esquerdo</SelectItem>
+              <SelectItem value="Ambidestro">⚖️ Ambidestro</SelectItem>
             </SelectContent>
           </Select>
         </div>
