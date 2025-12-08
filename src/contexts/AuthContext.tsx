@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   isAdmin: boolean;
+  isTrusted: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -58,7 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ 
       user, 
       userProfile, 
-      isAdmin: userProfile?.isAdmin ?? false, 
+      isAdmin: userProfile?.isAdmin ?? false,
+      isTrusted: userProfile?.trusted ?? false, 
       loading, 
       signIn, 
       signUp, 

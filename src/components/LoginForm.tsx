@@ -17,7 +17,7 @@ export function LoginForm() {
     try {
       if (isSignUp) {
         await signUp(email, password);
-        toast({ title: 'Conta criada com sucesso!' });
+        toast({ title: 'Conta criada! Aguarde aprovação do administrador.' });
       } else {
         await signIn(email, password);
         toast({ title: 'Login realizado com sucesso!' });

@@ -5,6 +5,7 @@ export interface UserProfile {
   uid: string;
   email: string;
   isAdmin: boolean;
+  trusted: boolean;
   createdAt: number;
 }
 
@@ -17,6 +18,7 @@ export async function createUserProfile(uid: string, email: string) {
       uid,
       email,
       isAdmin: false,
+      trusted: false,
       createdAt: Date.now()
     });
   }
