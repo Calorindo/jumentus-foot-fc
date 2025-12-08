@@ -5,14 +5,5 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/jumentus-foot-fc',
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+  plugins: [react()]
 });
