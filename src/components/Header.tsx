@@ -8,7 +8,7 @@ const Header = () => {
   return (
     <header className="gradient-hero text-primary-foreground py-6 px-4 shadow-elevated">
       <div className="container mx-auto flex items-center justify-between">
-        <img src="/LOGO_JUMENTUS.svg" alt="Jumentus FC" className="w-16 h-16 animate-bounce-soft" />
+        <img src="jumentus-foot-fc/LOGO_JUMENTUS.svg" alt="TESTE FC" className="w-16 h-16 animate-bounce-soft" />
         <div className="text-center flex-1">
           <h1 className="font-display text-4xl md:text-5xl tracking-wide">
             Jumentus FC
@@ -18,7 +18,7 @@ const Header = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <img src="/LOGO_JUMENTUS.svg" alt="Jumentus FC" className="w-16 h-16 animate-bounce-soft hidden md:block" />
+          <img src="jumentus-foot-fc/LOGO_JUMENTUS.svg" alt="Jumentus FC" className="w-16 h-16 animate-bounce-soft hidden md:block" />
           {user && (
             <Button
               variant="ghost"
