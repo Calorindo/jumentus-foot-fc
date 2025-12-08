@@ -17,6 +17,7 @@ export interface MatchData {
   startedAt: number;
   endedAt: number;
   votes: Record<string, number>; // playerId -> vote count
+  userVotes: Record<string, string>; // userId -> playerId voted for
 }
 
 export async function saveMatch(
@@ -45,7 +46,8 @@ export async function saveMatch(
     },
     startedAt: now,
     endedAt: now,
-    votes: {}
+    votes: {},
+    userVotes: {}
   });
 
   return matchId;
@@ -78,10 +80,26 @@ export function canVote(match: MatchData): boolean {
   return (now - match.endedAt) < twoHoursInMs;
 }
 
-export async function voteForPlayer(matchId: string, playerId: string): Promise<void> {
+export async function voteForPlayer(matchId: string, playerId: string, userId: string): Promise<void> {
+  // Check if user already voted
+  const userVoteRef = ref(database, `matches/${matchId}/userVotes/${userId}`);
+  const userVoteSnapshot = await get(userVoteRef);
+  
+  if (userVoteSnapshot.exists()) {
+    throw new Error('User already voted');
+  }
+  
+  // Register vote
   const voteRef = ref(database, `matches/${matchId}/votes/${playerId}`);
   const snapshot = await get(voteRef);
   const currentVotes = snapshot.exists() ? snapshot.val() : 0;
   
   await set(voteRef, currentVotes + 1);
+  await set(userVoteRef, playerId);
+}
+
+export async function hasUserVoted(matchId: string, userId: string): Promise<boolean> {
+  const userVoteRef = ref(database, `matches/${matchId}/userVotes/${userId}`);
+  const snapshot = await get(userVoteRef);
+  return snapshot.exists();
 }

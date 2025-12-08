@@ -3,18 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, ThumbsUp, Star, Clock, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { getRecentMatches, getMatch, voteForPlayer, canVote, type MatchData } from '@/services/matchService';
+import { getRecentMatches, getMatch, voteForPlayer, canVote, hasUserVoted, type MatchData } from '@/services/matchService';
 import { useFirebaseData } from '@/hooks/useFirebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
 import type { Player } from '@/types/player';
 
 interface MatchVotingProps {}
 
 const MatchVoting = ({}: MatchVotingProps) => {
+  const { user } = useAuth();
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [votedMatches, setVotedMatches] = useState<Set<string>>(new Set());
+  const [hasVoted, setHasVoted] = useState(false);
   const { data: playersData } = useFirebaseData<Record<string, any>>('players');
   const allPlayers = playersData ? Object.values(playersData).map(mapFirebaseToPlayer) : [];
 
@@ -37,15 +39,21 @@ const MatchVoting = ({}: MatchVotingProps) => {
     try {
       const matchData = await getMatch(matchId);
       setSelectedMatch(matchData);
+      
+      // Check if user already voted
+      if (user?.uid) {
+        const voted = await hasUserVoted(matchId, user.uid);
+        setHasVoted(voted);
+      }
     } catch (error) {
       toast.error('Erro ao carregar partida');
     }
   };
 
   const handleVote = async (playerId: string) => {
-    if (!selectedMatch) return;
+    if (!selectedMatch || !user?.uid) return;
     
-    if (votedMatches.has(selectedMatch.id)) {
+    if (hasVoted) {
       toast.error('Você já votou nesta partida!');
       return;
     }
@@ -56,12 +64,17 @@ const MatchVoting = ({}: MatchVotingProps) => {
     }
 
     try {
-      await voteForPlayer(selectedMatch.id, playerId);
-      setVotedMatches(prev => new Set(prev).add(selectedMatch.id));
+      await voteForPlayer(selectedMatch.id, playerId, user.uid);
+      setHasVoted(true);
       toast.success('Voto registrado!');
       await loadMatch(selectedMatch.id);
-    } catch (error) {
-      toast.error('Erro ao registrar voto');
+    } catch (error: any) {
+      if (error.message === 'User already voted') {
+        toast.error('Você já votou nesta partida!');
+        setHasVoted(true);
+      } else {
+        toast.error('Erro ao registrar voto');
+      }
     }
   };
 
@@ -106,7 +119,6 @@ const MatchVoting = ({}: MatchVotingProps) => {
 
     const topPlayer = sortedByVotes[0];
     const topVotes = selectedMatch.votes?.[topPlayer?.id] || 0;
-    const hasVoted = votedMatches.has(selectedMatch.id);
     const votingOpen = canVote(selectedMatch);
 
     return (
