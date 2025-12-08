@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Goal, Shield, Trophy, ArrowLeft } from 'lucide-react';
+import { Goal, Shield, Trophy, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Team, Player } from '@/types/player';
 
 interface MatchControlProps {
@@ -10,9 +11,12 @@ interface MatchControlProps {
   onGoal: (teamName: string, playerId: string) => void;
   onSave: (teamName: string, playerId: string) => void;
   onEndMatch: () => void;
+  onAdjustGoals?: (playerId: string, delta: number) => void;
+  onAdjustSaves?: (playerId: string, delta: number) => void;
 }
 
-const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch }: MatchControlProps) => {
+const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch, onAdjustGoals, onAdjustSaves }: MatchControlProps) => {
+  const { isAdmin } = useAuth();
   const [matchGoals, setMatchGoals] = useState<{ teamName: string; playerId: string; playerName: string }[]>([]);
   const [matchSaves, setMatchSaves] = useState<{ teamName: string; playerId: string; playerName: string }[]>([]);
 
@@ -85,6 +89,16 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch }: MatchControl
               </div>
 
               <div className="flex gap-1">
+                {isAdmin && onAdjustGoals && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onAdjustGoals(player.id, -1)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Minus className="w-3 h-3" />
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   onClick={() => handleGoal(team, player)}
@@ -92,15 +106,47 @@ const MatchControl = ({ teamA, teamB, onGoal, onSave, onEndMatch }: MatchControl
                 >
                   <Goal className="w-4 h-4" />
                 </Button>
-                {player.isGoalkeeper && (
+                {isAdmin && onAdjustGoals && (
                   <Button
                     size="sm"
-                    variant="outline"
-                    onClick={() => handleSave(team, player)}
-                    className="h-8 px-2"
+                    variant="ghost"
+                    onClick={() => onAdjustGoals(player.id, 1)}
+                    className="h-8 w-8 p-0 text-green-600 hover:text-green-600"
                   >
-                    🧤
+                    <Plus className="w-3 h-3" />
                   </Button>
+                )}
+                {player.isGoalkeeper && (
+                  <>
+                    {isAdmin && onAdjustSaves && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onAdjustSaves(player.id, -1)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSave(team, player)}
+                      className="h-8 px-2"
+                    >
+                      🧤
+                    </Button>
+                    {isAdmin && onAdjustSaves && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onAdjustSaves(player.id, 1)}
+                        className="h-8 w-8 p-0 text-green-600 hover:text-green-600"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

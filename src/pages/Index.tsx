@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
 import { useFirebaseData } from '@/hooks/useFirebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, incrementPlayerGoal } from '@/services/addPlayer';
 import { reactivatePlayer } from '@/services/reactivatePlayer';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
@@ -14,6 +16,7 @@ import { toast } from 'sonner';
 import type { Player, Team } from '@/types/player';
 
 const Index = () => {
+  const { isAdmin } = useAuth();
   const { data: playersData } = useFirebaseData<Record<string, any>>('players');
   const allPlayers = playersData ? Object.values(playersData).map(mapFirebaseToPlayer) : [];
   const activePlayers = allPlayers.filter(p => p.active !== false);
@@ -35,12 +38,18 @@ const Index = () => {
 
   const updatePlayer = useCallback(
     async (player: Player) => {
+      if (!isAdmin) {
+        toast.error('Apenas administradores podem editar jogadores');
+        return;
+      }
       try {
         await updatePlayerStats(player.id, {
           name: player.name,
           skill_level: player.skillLevel,
           is_goalkeeper: player.isGoalkeeper,
-          active: player.active
+          active: player.active,
+          goals: player.goals,
+          saves: player.saves
         });
         setEditingPlayer(null);
         toast.success(`${player.name} atualizado!`);
@@ -48,11 +57,15 @@ const Index = () => {
         toast.error('Erro ao atualizar jogador');
       }
     },
-    []
+    [isAdmin]
   );
 
   const deletePlayer = useCallback(
     async (id: string) => {
+      if (!isAdmin) {
+        toast.error('Apenas administradores podem desativar jogadores');
+        return;
+      }
       try {
         const player = allPlayers.find((p) => p.id === id);
         await deletePlayerFromDB(id);
@@ -61,11 +74,15 @@ const Index = () => {
         toast.error('Erro ao desativar jogador');
       }
     },
-    [allPlayers]
+    [allPlayers, isAdmin]
   );
 
   const handleReactivatePlayer = useCallback(
     async (id: string) => {
+      if (!isAdmin) {
+        toast.error('Apenas administradores podem reativar jogadores');
+        return;
+      }
       try {
         const player = allPlayers.find((p) => p.id === id);
         await reactivatePlayer(id);
@@ -74,7 +91,7 @@ const Index = () => {
         toast.error('Erro ao reativar jogador');
       }
     },
-    [allPlayers]
+    [allPlayers, isAdmin]
   );
 
   const handleTeamsCreated = useCallback((teamA: Team, teamB: Team) => {
@@ -115,6 +132,56 @@ const Index = () => {
       toast.success(`🧤 Defesa! ${player?.name}`);
     },
     [allPlayers]
+  );
+
+  const handleAdjustGoals = useCallback(
+    async (playerId: string, delta: number) => {
+      if (!isAdmin || !currentMatch) return;
+      
+      const player = allPlayers.find((p) => p.id === playerId);
+      if (player) {
+        const newGoals = Math.max(0, player.goals + delta);
+        await updatePlayerStats(playerId, { goals: newGoals });
+        
+        // Atualizar placar da partida
+        setCurrentMatch((prev) => {
+          if (!prev) return null;
+          
+          const isInTeamA = prev.teamA.players.some(p => p.id === playerId);
+          const isInTeamB = prev.teamB.players.some(p => p.id === playerId);
+          
+          if (isInTeamA) {
+            return {
+              ...prev,
+              teamA: { ...prev.teamA, score: Math.max(0, prev.teamA.score + delta) }
+            };
+          } else if (isInTeamB) {
+            return {
+              ...prev,
+              teamB: { ...prev.teamB, score: Math.max(0, prev.teamB.score + delta) }
+            };
+          }
+          return prev;
+        });
+        
+        toast.success(`Gols de ${player.name}: ${newGoals}`);
+      }
+    },
+    [allPlayers, isAdmin, currentMatch]
+  );
+
+  const handleAdjustSaves = useCallback(
+    async (playerId: string, delta: number) => {
+      if (!isAdmin) return;
+      
+      const player = allPlayers.find((p) => p.id === playerId);
+      if (player) {
+        const newSaves = Math.max(0, player.saves + delta);
+        await updatePlayerStats(playerId, { saves: newSaves });
+        toast.success(`Defesas de ${player.name}: ${newSaves}`);
+      }
+    },
+    [allPlayers, isAdmin]
   );
 
   const handleEndMatch = useCallback(() => {
@@ -163,6 +230,7 @@ const Index = () => {
                 onEdit={setEditingPlayer}
                 onDelete={deletePlayer}
                 onReactivate={handleReactivatePlayer}
+                showActions={isAdmin}
               />
             </div>
           </div>
@@ -179,6 +247,8 @@ const Index = () => {
             onGoal={handleGoal}
             onSave={handleSave}
             onEndMatch={handleEndMatch}
+            onAdjustGoals={handleAdjustGoals}
+            onAdjustSaves={handleAdjustSaves}
           />
         )}
 

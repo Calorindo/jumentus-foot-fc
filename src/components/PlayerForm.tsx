@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { UserPlus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Player } from '@/types/player';
 
 interface PlayerFormProps {
@@ -15,10 +16,13 @@ interface PlayerFormProps {
 }
 
 const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }: PlayerFormProps) => {
+  const { isAdmin } = useAuth();
   const [name, setName] = useState('');
   const [skillLevel, setSkillLevel] = useState(5);
   const [isGoalkeeper, setIsGoalkeeper] = useState(false);
   const [isActive, setIsActive] = useState(true);
+  const [goals, setGoals] = useState(0);
+  const [saves, setSaves] = useState(0);
 
   useEffect(() => {
     if (editingPlayer) {
@@ -26,11 +30,15 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setSkillLevel(editingPlayer.skillLevel);
       setIsGoalkeeper(editingPlayer.isGoalkeeper);
       setIsActive(editingPlayer.active ?? true);
+      setGoals(editingPlayer.goals);
+      setSaves(editingPlayer.saves);
     } else {
       setName('');
       setSkillLevel(5);
       setIsGoalkeeper(false);
       setIsActive(true);
+      setGoals(0);
+      setSaves(0);
     }
   }, [editingPlayer]);
 
@@ -45,6 +53,8 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         skillLevel,
         isGoalkeeper,
         active: isActive,
+        goals,
+        saves,
       });
     } else {
       onAddPlayer({
@@ -58,6 +68,8 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setSkillLevel(5);
     setIsGoalkeeper(false);
     setIsActive(true);
+    setGoals(0);
+    setSaves(0);
   };
 
   return (
@@ -110,16 +122,46 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         </div>
 
         {editingPlayer && (
-          <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-            <Label htmlFor="active" className="text-foreground font-medium cursor-pointer">
-              ✅ Ativo
-            </Label>
-            <Switch
-              id="active"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
-          </div>
+          <>
+            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+              <Label htmlFor="active" className="text-foreground font-medium cursor-pointer">
+                ✅ Ativo
+              </Label>
+              <Switch
+                id="active"
+                checked={isActive}
+                onCheckedChange={setIsActive}
+              />
+            </div>
+
+            {isAdmin && (
+              <>
+                <div>
+                  <Label htmlFor="goals" className="text-foreground font-medium">⚽ Gols</Label>
+                  <Input
+                    id="goals"
+                    type="number"
+                    min="0"
+                    value={goals}
+                    onChange={(e) => setGoals(parseInt(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="saves" className="text-foreground font-medium">🧤 Defesas</Label>
+                  <Input
+                    id="saves"
+                    type="number"
+                    min="0"
+                    value={saves}
+                    onChange={(e) => setSaves(parseInt(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
+              </>
+            )}
+          </>
         )}
 
         <div className="flex gap-2">

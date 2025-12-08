@@ -11,6 +11,7 @@ interface PlayerListProps {
   selectable?: boolean;
   selectedIds?: string[];
   onToggleSelect?: (id: string) => void;
+  showActions?: boolean;
 }
 
 const PlayerList = ({
@@ -21,6 +22,7 @@ const PlayerList = ({
   selectable = false,
   selectedIds = [],
   onToggleSelect,
+  showActions = true,
 }: PlayerListProps) => {
   const getSkillColor = (level: number) => {
     if (level >= 8) return 'bg-gold text-foreground';
@@ -84,7 +86,7 @@ const PlayerList = ({
             {player.skillLevel}
           </Badge>
 
-          {!selectable && (
+          {!selectable && showActions && (
             <div className="flex gap-1">
               {player.active === false ? (
                 <Button
