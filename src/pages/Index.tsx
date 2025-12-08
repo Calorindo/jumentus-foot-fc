@@ -221,8 +221,8 @@ const Index = () => {
               onUpdatePlayer={updatePlayer}
               onCancelEdit={() => setEditingPlayer(null)}
             />
-            <div>
-              <h2 className="font-display text-2xl text-primary mb-4">
+            <div className="min-w-0">
+              <h2 className="font-display text-xl sm:text-2xl text-primary mb-4">
                 Jogadores Cadastrados ({allPlayers.length})
               </h2>
               <PlayerList

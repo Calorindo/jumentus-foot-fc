@@ -73,12 +73,12 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card-elevated p-6 animate-fade-in">
-      <h2 className="font-display text-2xl text-primary mb-4">
+    <form onSubmit={handleSubmit} className="card-elevated p-4 sm:p-6 animate-fade-in">
+      <h2 className="font-display text-xl sm:text-2xl text-primary mb-4">
         {editingPlayer ? 'Editar Jogador' : 'Novo Jogador'}
       </h2>
       
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div>
           <Label htmlFor="name" className="text-foreground font-medium">Nome</Label>
           <Input
@@ -164,13 +164,13 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
           </>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button type="submit" className="flex-1 btn-primary">
             <UserPlus className="w-4 h-4 mr-2" />
             {editingPlayer ? 'Salvar' : 'Adicionar'}
           </Button>
           {editingPlayer && onCancelEdit && (
-            <Button type="button" variant="outline" onClick={onCancelEdit}>
+            <Button type="button" variant="outline" onClick={onCancelEdit} className="w-full sm:w-auto">
               Cancelar
             </Button>
           )}

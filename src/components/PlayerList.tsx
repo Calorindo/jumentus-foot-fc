@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, Shield, Goal, RotateCcw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Pencil, Trash2, Shield, Goal, RotateCcw, Search } from 'lucide-react';
 import type { Player } from '@/types/player';
 
 interface PlayerListProps {
@@ -24,11 +26,17 @@ const PlayerList = ({
   onToggleSelect,
   showActions = true,
 }: PlayerListProps) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const getSkillColor = (level: number) => {
     if (level >= 8) return 'bg-gold text-foreground';
     if (level >= 5) return 'bg-primary text-primary-foreground';
     return 'bg-muted text-muted-foreground';
   };
+
+  const filteredPlayers = players.filter(player => 
+    player.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (players.length === 0) {
     return (
@@ -42,8 +50,25 @@ const PlayerList = ({
   }
 
   return (
-    <div className="space-y-2">
-      {players.map((player, index) => (
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Buscar jogador..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      
+      {filteredPlayers.length === 0 ? (
+        <div className="card-elevated p-6 text-center">
+          <p className="text-muted-foreground text-sm">Nenhum jogador encontrado.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filteredPlayers.map((player, index) => (
         <div
           key={player.id}
           className={`card-elevated p-4 flex items-center gap-4 animate-slide-up transition-all ${
@@ -130,7 +155,9 @@ const PlayerList = ({
             </div>
           )}
         </div>
-      ))}
+          ))}
+        </div>
+      )}
     </div>
   );
 };
