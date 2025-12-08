@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useFirebaseData } from '@/hooks/useFirebase';
 import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, incrementPlayerGoal } from '@/services/addPlayer';
+import { reactivatePlayer } from '@/services/reactivatePlayer';
+import { mapFirebaseToPlayer } from '@/utils/playerMapper';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
 import PlayerForm from '@/components/PlayerForm';
@@ -12,8 +14,9 @@ import { toast } from 'sonner';
 import type { Player, Team } from '@/types/player';
 
 const Index = () => {
-  const { data: playersData } = useFirebaseData<Record<string, Player>>('players');
-  const players = playersData ? Object.values(playersData) : [];
+  const { data: playersData } = useFirebaseData<Record<string, any>>('players');
+  const allPlayers = playersData ? Object.values(playersData).map(mapFirebaseToPlayer) : [];
+  const activePlayers = allPlayers.filter(p => p.active !== false);
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team } | null>(null);
@@ -36,7 +39,8 @@ const Index = () => {
         await updatePlayerStats(player.id, {
           name: player.name,
           skill_level: player.skillLevel,
-          is_goalkeeper: player.isGoalkeeper
+          is_goalkeeper: player.isGoalkeeper,
+          active: player.active
         });
         setEditingPlayer(null);
         toast.success(`${player.name} atualizado!`);
@@ -50,14 +54,27 @@ const Index = () => {
   const deletePlayer = useCallback(
     async (id: string) => {
       try {
-        const player = players.find((p) => p.id === id);
+        const player = allPlayers.find((p) => p.id === id);
         await deletePlayerFromDB(id);
-        toast.success(`${player?.name} removido!`);
+        toast.success(`${player?.name} desativado!`);
       } catch (error) {
-        toast.error('Erro ao remover jogador');
+        toast.error('Erro ao desativar jogador');
       }
     },
-    [players]
+    [allPlayers]
+  );
+
+  const handleReactivatePlayer = useCallback(
+    async (id: string) => {
+      try {
+        const player = allPlayers.find((p) => p.id === id);
+        await reactivatePlayer(id);
+        toast.success(`${player?.name} reativado!`);
+      } catch (error) {
+        toast.error('Erro ao reativar jogador');
+      }
+    },
+    [allPlayers]
   );
 
   const handleTeamsCreated = useCallback((teamA: Team, teamB: Team) => {
@@ -70,7 +87,7 @@ const Index = () => {
     async (teamName: string, playerId: string) => {
       if (!currentMatch) return;
 
-      const player = players.find((p) => p.id === playerId);
+      const player = allPlayers.find((p) => p.id === playerId);
       if (player) {
         await incrementPlayerGoal(playerId, player.goals + 1);
       }
@@ -85,19 +102,19 @@ const Index = () => {
 
       toast.success(`⚽ GOL! ${player?.name}`);
     },
-    [currentMatch, players]
+    [currentMatch, allPlayers]
   );
 
   const handleSave = useCallback(
     async (teamName: string, playerId: string) => {
-      const player = players.find((p) => p.id === playerId);
+      const player = allPlayers.find((p) => p.id === playerId);
       if (player) {
         await updatePlayerStats(playerId, { saves: player.saves + 1 });
       }
 
       toast.success(`🧤 Defesa! ${player?.name}`);
     },
-    [players]
+    [allPlayers]
   );
 
   const handleEndMatch = useCallback(() => {
@@ -139,19 +156,20 @@ const Index = () => {
             />
             <div>
               <h2 className="font-display text-2xl text-primary mb-4">
-                Jogadores Cadastrados ({players.length})
+                Jogadores Cadastrados ({allPlayers.length})
               </h2>
               <PlayerList
-                players={players}
+                players={allPlayers}
                 onEdit={setEditingPlayer}
                 onDelete={deletePlayer}
+                onReactivate={handleReactivatePlayer}
               />
             </div>
           </div>
         )}
 
         {activeTab === 'teams' && (
-          <TeamBuilder players={players} onTeamsCreated={handleTeamsCreated} />
+          <TeamBuilder players={activePlayers} onTeamsCreated={handleTeamsCreated} />
         )}
 
         {activeTab === 'match' && currentMatch && (
@@ -164,7 +182,7 @@ const Index = () => {
           />
         )}
 
-        {activeTab === 'stats' && <Statistics players={players} />}
+        {activeTab === 'stats' && <Statistics players={activePlayers} />}
       </main>
     </div>
   );

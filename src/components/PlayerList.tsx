@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, Shield, Goal } from 'lucide-react';
+import { Pencil, Trash2, Shield, Goal, RotateCcw } from 'lucide-react';
 import type { Player } from '@/types/player';
 
 interface PlayerListProps {
   players: Player[];
   onEdit: (player: Player) => void;
   onDelete: (id: string) => void;
+  onReactivate?: (id: string) => void;
   selectable?: boolean;
   selectedIds?: string[];
   onToggleSelect?: (id: string) => void;
@@ -16,6 +17,7 @@ const PlayerList = ({
   players,
   onEdit,
   onDelete,
+  onReactivate,
   selectable = false,
   selectedIds = [],
   onToggleSelect,
@@ -42,13 +44,17 @@ const PlayerList = ({
       {players.map((player, index) => (
         <div
           key={player.id}
-          className={`card-elevated p-4 flex items-center gap-4 animate-slide-up cursor-pointer transition-all ${
+          className={`card-elevated p-4 flex items-center gap-4 animate-slide-up transition-all ${
             selectable && selectedIds.includes(player.id)
               ? 'ring-2 ring-primary bg-secondary'
               : ''
+          } ${
+            player.active === false ? 'opacity-50' : ''
+          } ${
+            selectable && player.active !== false ? 'cursor-pointer' : ''
           }`}
           style={{ animationDelay: `${index * 50}ms` }}
-          onClick={() => selectable && onToggleSelect?.(player.id)}
+          onClick={() => selectable && player.active !== false && onToggleSelect?.(player.id)}
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -80,28 +86,45 @@ const PlayerList = ({
 
           {!selectable && (
             <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(player);
-                }}
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
-              >
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(player.id);
-                }}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              {player.active === false ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReactivate?.(player.id);
+                  }}
+                  className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                  title="Reativar jogador"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(player);
+                    }}
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(player.id);
+                    }}
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>

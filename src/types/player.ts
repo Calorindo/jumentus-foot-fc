@@ -5,6 +5,7 @@ export interface Player {
   goals: number;
   saves: number;
   isGoalkeeper: boolean;
+  active: boolean;
 }
 
 export interface Team {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,9 +15,24 @@ interface PlayerFormProps {
 }
 
 const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }: PlayerFormProps) => {
-  const [name, setName] = useState(editingPlayer?.name || '');
-  const [skillLevel, setSkillLevel] = useState(editingPlayer?.skillLevel || 5);
-  const [isGoalkeeper, setIsGoalkeeper] = useState(editingPlayer?.isGoalkeeper || false);
+  const [name, setName] = useState('');
+  const [skillLevel, setSkillLevel] = useState(5);
+  const [isGoalkeeper, setIsGoalkeeper] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (editingPlayer) {
+      setName(editingPlayer.name);
+      setSkillLevel(editingPlayer.skillLevel);
+      setIsGoalkeeper(editingPlayer.isGoalkeeper);
+      setIsActive(editingPlayer.active ?? true);
+    } else {
+      setName('');
+      setSkillLevel(5);
+      setIsGoalkeeper(false);
+      setIsActive(true);
+    }
+  }, [editingPlayer]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +44,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         name: name.trim(),
         skillLevel,
         isGoalkeeper,
+        active: isActive,
       });
     } else {
       onAddPlayer({
@@ -41,6 +57,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setName('');
     setSkillLevel(5);
     setIsGoalkeeper(false);
+    setIsActive(true);
   };
 
   return (
@@ -91,6 +108,19 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
             onCheckedChange={setIsGoalkeeper}
           />
         </div>
+
+        {editingPlayer && (
+          <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+            <Label htmlFor="active" className="text-foreground font-medium cursor-pointer">
+              ✅ Ativo
+            </Label>
+            <Switch
+              id="active"
+              checked={isActive}
+              onCheckedChange={setIsActive}
+            />
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button type="submit" className="flex-1 btn-primary">
