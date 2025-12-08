@@ -6,6 +6,7 @@ export interface Player {
   name: string;
   skill_level: number;
   goals: number;
+  assists: number;
   saves: number;
   is_goalkeeper: boolean;
   created_at: number;
@@ -23,6 +24,7 @@ export async function createPlayer(name: string, skill: number, is_goalkeeper = 
     name: name.trim(),
     skill_level: skill,
     goals: 0,
+    assists: 0,
     saves: 0,
     is_goalkeeper: is_goalkeeper,
     created_at: now,

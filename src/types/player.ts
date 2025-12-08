@@ -3,6 +3,7 @@ export interface Player {
   name: string;
   skillLevel: number;
   goals: number;
+  assists: number;
   saves: number;
   isGoalkeeper: boolean;
   active: boolean;

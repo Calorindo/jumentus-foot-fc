@@ -22,6 +22,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   const [isGoalkeeper, setIsGoalkeeper] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [goals, setGoals] = useState(0);
+  const [assists, setAssists] = useState(0);
   const [saves, setSaves] = useState(0);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setIsGoalkeeper(editingPlayer.isGoalkeeper);
       setIsActive(editingPlayer.active ?? true);
       setGoals(editingPlayer.goals);
+      setAssists(editingPlayer.assists);
       setSaves(editingPlayer.saves);
     } else {
       setName('');
@@ -38,6 +40,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setIsGoalkeeper(false);
       setIsActive(true);
       setGoals(0);
+      setAssists(0);
       setSaves(0);
     }
   }, [editingPlayer]);
@@ -54,6 +57,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         isGoalkeeper,
         active: isActive,
         goals,
+        assists,
         saves,
       });
     } else {
@@ -69,6 +73,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setIsGoalkeeper(false);
     setIsActive(true);
     setGoals(0);
+    setAssists(0);
     setSaves(0);
   };
 
@@ -144,6 +149,18 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
                     min="0"
                     value={goals}
                     onChange={(e) => setGoals(parseInt(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="assists" className="text-foreground font-medium">🎯 Assistências</Label>
+                  <Input
+                    id="assists"
+                    type="number"
+                    min="0"
+                    value={assists}
+                    onChange={(e) => setAssists(parseInt(e.target.value) || 0)}
                     className="mt-1"
                   />
                 </div>

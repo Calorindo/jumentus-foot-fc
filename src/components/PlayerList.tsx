@@ -97,11 +97,14 @@ const PlayerList = ({
             </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Goal className="w-3 h-3" /> {player.goals} gols
+                <Goal className="w-3 h-3" /> {player.goals}
+              </span>
+              <span className="flex items-center gap-1">
+                🎯 {player.assists}
               </span>
               {player.isGoalkeeper && (
                 <span className="flex items-center gap-1">
-                  🧤 {player.saves} defesas
+                  🧤 {player.saves}
                 </span>
               )}
             </div>

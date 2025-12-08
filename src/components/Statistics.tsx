@@ -8,11 +8,13 @@ interface StatisticsProps {
 
 const Statistics = ({ players }: StatisticsProps) => {
   const sortedByGoals = [...players].sort((a, b) => b.goals - a.goals);
+  const sortedByAssists = [...players].sort((a, b) => b.assists - a.assists);
   const sortedBySaves = [...players]
     .filter((p) => p.isGoalkeeper)
     .sort((a, b) => b.saves - a.saves);
 
   const topScorer = sortedByGoals[0];
+  const topAssister = sortedByAssists[0];
   const topGoalkeeper = sortedBySaves[0];
 
   if (players.length === 0) {
@@ -27,7 +29,7 @@ const Statistics = ({ players }: StatisticsProps) => {
     );
   }
 
-  const hasStats = players.some((p) => p.goals > 0 || p.saves > 0);
+  const hasStats = players.some((p) => p.goals > 0 || p.assists > 0 || p.saves > 0);
 
   if (!hasStats) {
     return (
@@ -44,8 +46,8 @@ const Statistics = ({ players }: StatisticsProps) => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* MVP Section */}
-      {(topScorer?.goals > 0 || topGoalkeeper?.saves > 0) && (
-        <div className="grid md:grid-cols-2 gap-4">
+      {(topScorer?.goals > 0 || topAssister?.assists > 0 || topGoalkeeper?.saves > 0) && (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {topScorer?.goals > 0 && (
             <div className="card-elevated p-6 text-center gradient-primary text-primary-foreground">
               <Trophy className="w-10 h-10 mx-auto mb-2 text-gold" />
@@ -54,6 +56,19 @@ const Statistics = ({ players }: StatisticsProps) => {
               <Badge className="mt-2 bg-gold text-foreground">
                 <Goal className="w-4 h-4 mr-1" />
                 {topScorer.goals} gols
+              </Badge>
+            </div>
+          )}
+
+          {topAssister?.assists > 0 && (
+            <div className="card-elevated p-6 text-center bg-secondary">
+              <Trophy className="w-10 h-10 mx-auto mb-2 text-primary" />
+              <p className="text-sm text-muted-foreground">Garçom</p>
+              <h3 className="font-display text-2xl mt-1 text-primary">
+                {topAssister.name}
+              </h3>
+              <Badge className="mt-2 bg-primary text-primary-foreground">
+                🎯 {topAssister.assists} assistências
               </Badge>
             </div>
           )}
@@ -101,6 +116,39 @@ const Statistics = ({ players }: StatisticsProps) => {
               <span className="flex-1 font-medium">{player.name}</span>
               <Badge variant="outline" className="font-bold">
                 {player.goals}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Assists Ranking */}
+      <div className="card-elevated p-6">
+        <h3 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
+          🎯 Ranking de Assistências
+        </h3>
+        <div className="space-y-2">
+          {sortedByAssists.slice(0, 10).map((player, index) => (
+            <div
+              key={player.id}
+              className="flex items-center gap-3 p-3 bg-secondary rounded-lg"
+            >
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                  index === 0
+                    ? 'bg-gold text-foreground'
+                    : index === 1
+                    ? 'bg-muted-foreground/30 text-foreground'
+                    : index === 2
+                    ? 'bg-burgundy-light text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {index + 1}
+              </span>
+              <span className="flex-1 font-medium">{player.name}</span>
+              <Badge variant="outline" className="font-bold">
+                {player.assists}
               </Badge>
             </div>
           ))}

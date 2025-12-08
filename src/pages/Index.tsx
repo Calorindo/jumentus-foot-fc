@@ -49,6 +49,7 @@ const Index = () => {
           is_goalkeeper: player.isGoalkeeper,
           active: player.active,
           goals: player.goals,
+          assists: player.assists,
           saves: player.saves
         });
         setEditingPlayer(null);
