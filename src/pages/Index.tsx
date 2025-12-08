@@ -4,6 +4,7 @@ import { useFirebaseData } from '@/hooks/useFirebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, incrementPlayerGoal } from '@/services/addPlayer';
 import { reactivatePlayer } from '@/services/reactivatePlayer';
+import { saveMatch } from '@/services/matchService';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
@@ -11,6 +12,7 @@ import PlayerForm from '@/components/PlayerForm';
 import PlayerList from '@/components/PlayerList';
 import TeamBuilder from '@/components/TeamBuilder';
 import MatchControl from '@/components/MatchControl';
+import MatchVoting from '@/components/MatchVoting';
 import Statistics from '@/components/Statistics';
 import { toast } from 'sonner';
 import type { Player, Team } from '@/types/player';
@@ -23,6 +25,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team } | null>(null);
+  const [votingMatchId, setVotingMatchId] = useState<string | null>(null);
 
   const addPlayer = useCallback(
     async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
@@ -223,7 +226,7 @@ const Index = () => {
     [allPlayers, isAdmin]
   );
 
-  const handleEndMatch = useCallback(() => {
+  const handleEndMatch = useCallback(async () => {
     if (currentMatch) {
       const winner =
         currentMatch.teamA.score > currentMatch.teamB.score
@@ -232,14 +235,29 @@ const Index = () => {
           ? currentMatch.teamB.name
           : 'Empate';
       
-      toast.success(
-        winner === 'Empate'
-          ? 'Partida encerrada! Foi empate!'
-          : `Partida encerrada! ${winner} venceu!`
-      );
+      try {
+        const matchId = await saveMatch(
+          currentMatch.teamA.name,
+          currentMatch.teamA.score,
+          currentMatch.teamA.players,
+          currentMatch.teamB.name,
+          currentMatch.teamB.score,
+          currentMatch.teamB.players
+        );
+        
+        setVotingMatchId(matchId);
+        setActiveTab('voting');
+        
+        toast.success(
+          winner === 'Empate'
+            ? 'Partida encerrada! Foi empate!'
+            : `Partida encerrada! ${winner} venceu!`
+        );
+      } catch (error) {
+        toast.error('Erro ao salvar partida');
+      }
     }
     setCurrentMatch(null);
-    setActiveTab('stats');
   }, [currentMatch]);
 
   return (
@@ -249,6 +267,7 @@ const Index = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         matchActive={!!currentMatch}
+        votingActive={!!votingMatchId}
       />
 
       <main className="container mx-auto py-4 sm:py-6 px-4">
@@ -294,6 +313,16 @@ const Index = () => {
         )}
 
         {activeTab === 'stats' && <Statistics players={activePlayers} />}
+
+        {activeTab === 'voting' && votingMatchId && (
+          <MatchVoting 
+            matchId={votingMatchId} 
+            onClose={() => {
+              setVotingMatchId(null);
+              setActiveTab('stats');
+            }}
+          />
+        )}
       </main>
     </div>
   );

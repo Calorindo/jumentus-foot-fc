@@ -1,17 +1,19 @@
 import { Button } from '@/components/ui/button';
-import { Users, Shuffle, Gamepad2, BarChart3 } from 'lucide-react';
+import { Users, Shuffle, Gamepad2, BarChart3, Award } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   matchActive: boolean;
+  votingActive?: boolean;
 }
 
-const Navigation = ({ activeTab, onTabChange, matchActive }: NavigationProps) => {
+const Navigation = ({ activeTab, onTabChange, matchActive, votingActive = false }: NavigationProps) => {
   const tabs = [
     { id: 'players', label: 'Jogadores', icon: Users },
     { id: 'teams', label: 'Times', icon: Shuffle },
     { id: 'match', label: 'Partida', icon: Gamepad2, disabled: !matchActive },
+    { id: 'voting', label: 'Votação', icon: Award, hidden: !votingActive },
     { id: 'stats', label: 'Estatísticas', icon: BarChart3 },
   ];
 
@@ -19,7 +21,7 @@ const Navigation = ({ activeTab, onTabChange, matchActive }: NavigationProps) =>
     <nav className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="container mx-auto">
         <div className="flex overflow-x-auto hide-scrollbar">
-          {tabs.map((tab) => {
+          {tabs.filter(tab => !tab.hidden).map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             const isDisabled = tab.disabled;
