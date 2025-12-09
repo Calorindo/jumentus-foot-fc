@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-empty-pattern */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +27,16 @@ const MatchVoting = ({}: MatchVotingProps) => {
     loadMatches();
   }, []);
 
+  useEffect(() => {
+    const checkVote = async () => {
+      if (selectedMatch && user?.uid) {
+        const voted = await hasUserVoted(selectedMatch.id, user.uid);
+        setHasVoted(voted);
+      }
+    };
+    checkVote();
+  }, [selectedMatch, user]);
+
   const loadMatches = async () => {
     try {
       const recentMatches = await getRecentMatches();
@@ -39,12 +52,6 @@ const MatchVoting = ({}: MatchVotingProps) => {
     try {
       const matchData = await getMatch(matchId);
       setSelectedMatch(matchData);
-      
-      // Check if user already voted
-      if (user?.uid) {
-        const voted = await hasUserVoted(matchId, user.uid);
-        setHasVoted(voted);
-      }
     } catch (error) {
       toast.error('Erro ao carregar partida');
     }
@@ -53,8 +60,11 @@ const MatchVoting = ({}: MatchVotingProps) => {
   const handleVote = async (playerId: string) => {
     if (!selectedMatch || !user?.uid) return;
     
-    if (hasVoted) {
+    // Double check if user already voted
+    const alreadyVoted = await hasUserVoted(selectedMatch.id, user.uid);
+    if (alreadyVoted || hasVoted) {
       toast.error('Você já votou nesta partida!');
+      setHasVoted(true);
       return;
     }
 
