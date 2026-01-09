@@ -31,7 +31,19 @@ export async function createPlayer(
   const id = newPlayerRef.key!;
   const now = Date.now();
 
-  await set(newPlayerRef, {
+  const playerData: Partial<Player> & {
+    id: string;
+    name: string;
+    skill_level: number;
+    goals: number;
+    assists: number;
+    saves: number;
+    is_goalkeeper: boolean;
+    position: string;
+    created_at: number;
+    updated_at: number;
+    active: boolean;
+  } = {
     id,
     name: name.trim(),
     skill_level: skill,
@@ -40,13 +52,23 @@ export async function createPlayer(
     saves: 0,
     is_goalkeeper: is_goalkeeper,
     position: position,
-    weight: weight,
-    height: height,
-    preferred_foot: preferred_foot,
     created_at: now,
     updated_at: now,
     active: true
-  });
+  };
+
+  // Apenas adiciona campos opcionais se eles tiverem valores
+  if (weight !== undefined && weight !== null) {
+    playerData.weight = weight;
+  }
+  if (height !== undefined && height !== null) {
+    playerData.height = height;
+  }
+  if (preferred_foot !== undefined && preferred_foot !== null) {
+    playerData.preferred_foot = preferred_foot;
+  }
+
+  await set(newPlayerRef, playerData);
 
   return id;
 }

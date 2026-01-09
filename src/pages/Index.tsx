@@ -40,6 +40,7 @@ const Index = () => {
         );
         toast.success(`${playerData.name} adicionado!`);
       } catch (error) {
+        console.log('Erro ao adicionar jogador', JSON.stringify(error));
         toast.error('Erro ao adicionar jogador');
       }
     },
