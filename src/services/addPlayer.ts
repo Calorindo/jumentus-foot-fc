@@ -84,10 +84,19 @@ export async function incrementPlayerGoal(playerId: string, goalsUpdated: number
 
 export async function updatePlayerStats(playerId: string, stats: Partial<Player>) {
   const now = Date.now();
-  await update(ref(database, `players/${playerId}`), {
-    ...stats,
+  
+  const cleanStats: Record<string, string | number | boolean> = {
     updated_at: now
+  };
+  
+  Object.keys(stats).forEach((key) => {
+    const value = stats[key as keyof Player];
+    if (value !== undefined && value !== null) {
+      cleanStats[key] = value as string | number | boolean;
+    }
   });
+  
+  await update(ref(database, `players/${playerId}`), cleanStats);
 }
 
 export async function deletePlayer(playerId: string) {
