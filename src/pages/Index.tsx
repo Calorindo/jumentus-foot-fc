@@ -4,7 +4,7 @@ import { useFirebaseData } from '@/hooks/useFirebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, permanentlyDeletePlayer, incrementPlayerGoal } from '@/services/addPlayer';
 import { reactivatePlayer } from '@/services/reactivatePlayer';
-import { saveMatch } from '@/services/matchService';
+import { saveMatch, createActiveMatch, getActiveMatch, updateMatchScore, endMatch } from '@/services/matchService';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
 import Header from '@/components/Header';
 import Navigation from '@/components/Navigation';
@@ -21,11 +21,46 @@ import type { Player, Team } from '@/types/player';
 const Index = () => {
   const { isAdmin } = useAuth();
   const { data: playersData } = useFirebaseData<Record<string, any>>('players');
+  const { data: matchesData } = useFirebaseData<Record<string, any>>('matches');
   const allPlayers = playersData ? Object.values(playersData).map(mapFirebaseToPlayer) : [];
   const activePlayers = allPlayers.filter(p => p.active !== false);
   const [activeTab, setActiveTab] = useState('players');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team } | null>(null);
+  const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team; id?: string } | null>(null);
+
+  // Buscar partida ativa ao carregar
+  useEffect(() => {
+    const loadActiveMatch = async () => {
+      try {
+        const activeMatch = await getActiveMatch();
+        if (activeMatch) {
+          const teamAPlayers = allPlayers.filter(p => activeMatch.teamA.playerIds.includes(p.id));
+          const teamBPlayers = allPlayers.filter(p => activeMatch.teamB.playerIds.includes(p.id));
+          
+          setCurrentMatch({
+            id: activeMatch.id,
+            teamA: {
+              name: activeMatch.teamA.name,
+              score: activeMatch.teamA.score,
+              players: teamAPlayers
+            },
+            teamB: {
+              name: activeMatch.teamB.name,
+              score: activeMatch.teamB.score,
+              players: teamBPlayers
+            }
+          });
+          setActiveTab('match');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar partida ativa:', error);
+      }
+    };
+    
+    if (allPlayers.length > 0) {
+      loadActiveMatch();
+    }
+  }, [allPlayers]);
 
   const addPlayer = useCallback(
     async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
@@ -131,10 +166,15 @@ const Index = () => {
     [allPlayers, isAdmin]
   );
 
-  const handleTeamsCreated = useCallback((teamA: Team, teamB: Team) => {
-    setCurrentMatch({ teamA, teamB });
-    setActiveTab('match');
-    toast.success('Partida iniciada! Boa pelada! ⚽');
+  const handleTeamsCreated = useCallback(async (teamA: Team, teamB: Team) => {
+    try {
+      const matchId = await createActiveMatch(teamA.name, teamA.players, teamB.name, teamB.players);
+      setCurrentMatch({ teamA, teamB, id: matchId });
+      setActiveTab('match');
+      toast.success('Partida iniciada! Boa pelada! ⚽');
+    } catch (error) {
+      toast.error('Erro ao criar partida');
+    }
   }, []);
 
   const handleGoal = useCallback(
@@ -148,10 +188,16 @@ const Index = () => {
 
       setCurrentMatch((prev) => {
         if (!prev) return null;
-        if (teamName === prev.teamA.name) {
-          return { ...prev, teamA: { ...prev.teamA, score: prev.teamA.score + 1 } };
+        const newMatch = teamName === prev.teamA.name
+          ? { ...prev, teamA: { ...prev.teamA, score: prev.teamA.score + 1 } }
+          : { ...prev, teamB: { ...prev.teamB, score: prev.teamB.score + 1 } };
+        
+        // Atualizar no Firebase
+        if (prev.id) {
+          updateMatchScore(prev.id, newMatch.teamA.score, newMatch.teamB.score);
         }
-        return { ...prev, teamB: { ...prev.teamB, score: prev.teamB.score + 1 } };
+        
+        return newMatch;
       });
 
       toast.success(`⚽ GOL! ${player?.name}`);
@@ -248,7 +294,7 @@ const Index = () => {
   );
 
   const handleEndMatch = useCallback(async () => {
-    if (currentMatch) {
+    if (currentMatch && currentMatch.id) {
       const winner =
         currentMatch.teamA.score > currentMatch.teamB.score
           ? currentMatch.teamA.name
@@ -257,14 +303,7 @@ const Index = () => {
           : 'Empate';
       
       try {
-        await saveMatch(
-          currentMatch.teamA.name,
-          currentMatch.teamA.score,
-          currentMatch.teamA.players,
-          currentMatch.teamB.name,
-          currentMatch.teamB.score,
-          currentMatch.teamB.players
-        );
+        await endMatch(currentMatch.id, currentMatch.teamA.score, currentMatch.teamB.score);
         
         setActiveTab('voting');
         
@@ -274,7 +313,7 @@ const Index = () => {
             : `Partida encerrada! ${winner} venceu!`
         );
       } catch (error) {
-        toast.error('Erro ao salvar partida');
+        toast.error('Erro ao encerrar partida');
       }
     }
     setCurrentMatch(null);

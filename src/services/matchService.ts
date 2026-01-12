@@ -17,6 +17,7 @@ export interface MatchData {
   };
   startedAt: number;
   endedAt: number;
+  isActive: boolean;
   votes: Record<string, number>; // playerId -> vote count
   userVotes: Record<string, string>; // userId -> playerId voted for
   votingFinalized?: boolean;
@@ -49,6 +50,39 @@ export async function saveMatch(
     },
     startedAt: now,
     endedAt: now,
+    isActive: false,
+    votes: {},
+    userVotes: {}
+  });
+
+  return matchId;
+}
+
+export async function createActiveMatch(
+  teamAName: string,
+  teamAPlayers: Player[],
+  teamBName: string,
+  teamBPlayers: Player[]
+): Promise<string> {
+  const newMatchRef = push(ref(database, 'matches'));
+  const matchId = newMatchRef.key!;
+  const now = Date.now();
+
+  await set(newMatchRef, {
+    id: matchId,
+    teamA: {
+      name: teamAName,
+      score: 0,
+      playerIds: teamAPlayers.map(p => p.id)
+    },
+    teamB: {
+      name: teamBName,
+      score: 0,
+      playerIds: teamBPlayers.map(p => p.id)
+    },
+    startedAt: now,
+    endedAt: 0,
+    isActive: true,
     votes: {},
     userVotes: {}
   });
@@ -66,13 +100,40 @@ export async function getMatch(matchId: string): Promise<MatchData | null> {
   return null;
 }
 
+export async function getActiveMatch(): Promise<MatchData | null> {
+  const matchesRef = ref(database, 'matches');
+  const snapshot = await get(matchesRef);
+  
+  if (snapshot.exists()) {
+    const matches = Object.values(snapshot.val()) as MatchData[];
+    return matches.find(match => match.isActive) || null;
+  }
+  return null;
+}
+
+export async function updateMatchScore(matchId: string, teamAScore: number, teamBScore: number): Promise<void> {
+  await update(ref(database, `matches/${matchId}`), {
+    'teamA/score': teamAScore,
+    'teamB/score': teamBScore
+  });
+}
+
+export async function endMatch(matchId: string, teamAScore: number, teamBScore: number): Promise<void> {
+  await update(ref(database, `matches/${matchId}`), {
+    'teamA/score': teamAScore,
+    'teamB/score': teamBScore,
+    endedAt: Date.now(),
+    isActive: false
+  });
+}
+
 export async function getRecentMatches(): Promise<MatchData[]> {
   const matchesRef = ref(database, 'matches');
   const snapshot = await get(matchesRef);
   
   if (snapshot.exists()) {
     const matches = Object.values(snapshot.val()) as MatchData[];
-    return matches.sort((a, b) => b.endedAt - a.endedAt).slice(0, 10);
+    return matches.filter(m => !m.isActive).sort((a, b) => b.endedAt - a.endedAt).slice(0, 10);
   }
   return [];
 }
@@ -106,7 +167,6 @@ export async function hasUserVoted(matchId: string, userId: string): Promise<boo
   const snapshot = await get(userVoteRef);
   return snapshot.exists();
 }
-
 export async function finalizeVoting(matchId: string): Promise<string | null> {
   const match = await getMatch(matchId);
   if (!match || !match.votes) return null;
