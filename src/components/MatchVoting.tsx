@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, ThumbsUp, Star, Clock, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { getRecentMatches, getMatch, voteForPlayer, canVote, hasUserVoted, type MatchData } from '@/services/matchService';
+import { getRecentMatches, getMatch, voteForPlayer, canVote, hasUserVoted, finalizeVoting, type MatchData } from '@/services/matchService';
 import { useFirebaseData } from '@/hooks/useFirebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
@@ -15,7 +15,7 @@ import type { Player } from '@/types/player';
 interface MatchVotingProps {}
 
 const MatchVoting = ({}: MatchVotingProps) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [matches, setMatches] = useState<MatchData[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<MatchData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +88,23 @@ const MatchVoting = ({}: MatchVotingProps) => {
     }
   };
 
+  const handleFinalizeVoting = async () => {
+    if (!selectedMatch || !isAdmin) return;
+    
+    try {
+      const winnerId = await finalizeVoting(selectedMatch.id);
+      if (winnerId) {
+        const winner = allPlayers.find(p => p.id === winnerId);
+        toast.success(`Votação finalizada! MVP: ${winner?.name}`);
+        await loadMatch(selectedMatch.id);
+      } else {
+        toast.error('Nenhum voto encontrado');
+      }
+    } catch (error) {
+      toast.error('Erro ao finalizar votação');
+    }
+  };
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('pt-BR', { 
@@ -149,9 +166,9 @@ const MatchVoting = ({}: MatchVotingProps) => {
             <p className="text-sm opacity-80">
               {selectedMatch.teamA.name} {selectedMatch.teamA.score} × {selectedMatch.teamB.score} {selectedMatch.teamB.name}
             </p>
-            <Badge className={`mt-2 ${votingOpen ? 'bg-green-500' : 'bg-red-500'}`}>
+            <Badge className={`mt-2 ${votingOpen ? 'bg-green-500' : selectedMatch.votingFinalized ? 'bg-gold' : 'bg-red-500'}`}>
               <Clock className="w-3 h-3 mr-1" />
-              {votingOpen ? `Tempo: ${getTimeRemaining(selectedMatch)}` : 'Votação encerrada'}
+              {selectedMatch.votingFinalized ? 'Finalizada' : votingOpen ? `Tempo: ${getTimeRemaining(selectedMatch)}` : 'Votação encerrada'}
             </Badge>
           </div>
         </div>
@@ -159,12 +176,15 @@ const MatchVoting = ({}: MatchVotingProps) => {
       {topVotes > 0 && (
         <div className="card-elevated p-6 text-center bg-gold/10 border-2 border-gold">
           <Star className="w-10 h-10 mx-auto mb-2 text-gold" />
-          <p className="text-sm text-muted-foreground">Líder em Votos</p>
+          <p className="text-sm text-muted-foreground">{selectedMatch.votingFinalized ? 'MVP da Partida' : 'Líder em Votos'}</p>
           <h3 className="font-display text-2xl text-gold mt-1">{topPlayer.name}</h3>
           <Badge className="mt-2 bg-gold text-foreground">
             <ThumbsUp className="w-4 h-4 mr-1" />
             {topVotes} votos
           </Badge>
+          {selectedMatch.votingFinalized && (
+            <p className="text-xs text-muted-foreground mt-2">⭐ MVP Count atualizado!</p>
+          )}
         </div>
       )}
 
@@ -197,17 +217,35 @@ const MatchVoting = ({}: MatchVotingProps) => {
                 <Button
                   size="sm"
                   onClick={() => handleVote(player.id)}
-                  disabled={hasVoted || !votingOpen}
+                  disabled={hasVoted || !votingOpen || selectedMatch.votingFinalized}
                   className="bg-primary hover:bg-primary/80"
                 >
                   <ThumbsUp className="w-4 h-4 mr-1" />
-                  {hasVoted ? 'Votado' : 'Votar'}
+                  {selectedMatch.votingFinalized ? 'Finalizada' : hasVoted ? 'Votado' : 'Votar'}
                 </Button>
               </div>
             );
           })}
         </div>
       </div>
+
+      {isAdmin && !selectedMatch.votingFinalized && topVotes > 0 && (
+        <div className="card-elevated p-4 bg-gold/5 border border-gold/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gold">Finalizar Votação</p>
+              <p className="text-xs text-muted-foreground">Isso irá atualizar o MVP Count do vencedor</p>
+            </div>
+            <Button
+              onClick={handleFinalizeVoting}
+              className="bg-gold hover:bg-gold/80 text-black"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Finalizar
+            </Button>
+          </div>
+        </div>
+      )}
 
       </div>
     );

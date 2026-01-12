@@ -12,6 +12,7 @@ const Statistics = ({ players }: StatisticsProps) => {
   const sortedBySaves = [...players]
     .filter((p) => p.isGoalkeeper)
     .sort((a, b) => b.saves - a.saves);
+  const sortedByMvp = [...players].sort((a, b) => (b.mvpCount || 0) - (a.mvpCount || 0));
 
   const topScorer = sortedByGoals[0];
   const topAssister = sortedByAssists[0];
@@ -154,6 +155,41 @@ const Statistics = ({ players }: StatisticsProps) => {
           ))}
         </div>
       </div>
+
+      {/* MVP Ranking */}
+      {sortedByMvp.some(p => (p.mvpCount || 0) > 0) && (
+        <div className="card-elevated p-6">
+          <h3 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
+            ⭐ Ranking Melhor da Partida
+          </h3>
+          <div className="space-y-2">
+            {sortedByMvp.filter(p => (p.mvpCount || 0) > 0).slice(0, 10).map((player, index) => (
+              <div
+                key={player.id}
+                className="flex items-center gap-3 p-3 bg-secondary rounded-lg"
+              >
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                    index === 0
+                      ? 'bg-gold text-black'
+                      : index === 1
+                      ? 'bg-gray-400 text-black'
+                      : index === 2
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                <span className="flex-1 font-medium">{player.name}</span>
+                <Badge variant="outline" className="font-bold">
+                  {player.mvpCount || 0}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Saves Ranking */}
       {sortedBySaves.length > 0 && (

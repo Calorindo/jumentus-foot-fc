@@ -7,6 +7,7 @@ interface FirebasePlayer {
   goals: number;
   assists: number;
   saves: number;
+  mvp_count?: number;
   is_goalkeeper: boolean;
   position: string;
   weight?: number;
@@ -23,6 +24,7 @@ export function mapFirebaseToPlayer(data: FirebasePlayer): Player {
     goals: data.goals,
     assists: data.assists ?? 0,
     saves: data.saves,
+    mvpCount: data.mvp_count ?? 0,
     isGoalkeeper: data.is_goalkeeper,
     position: (data.position ?? 'Atacante') as any,
     weight: data.weight,

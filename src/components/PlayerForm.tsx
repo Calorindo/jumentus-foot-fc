@@ -29,6 +29,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   const [goals, setGoals] = useState(0);
   const [assists, setAssists] = useState(0);
   const [saves, setSaves] = useState(0);
+  const [mvpCount, setMvpCount] = useState(0);
 
   useEffect(() => {
     if (editingPlayer) {
@@ -43,6 +44,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setGoals(editingPlayer.goals);
       setAssists(editingPlayer.assists);
       setSaves(editingPlayer.saves);
+      setMvpCount(editingPlayer.mvpCount || 0);
     } else {
       setName('');
       setSkillLevel(5);
@@ -55,6 +57,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setGoals(0);
       setAssists(0);
       setSaves(0);
+      setMvpCount(0);
     }
   }, [editingPlayer]);
 
@@ -76,6 +79,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
         goals,
         assists,
         saves,
+        mvpCount,
       });
     } else {
       onAddPlayer({
@@ -100,6 +104,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setGoals(0);
     setAssists(0);
     setSaves(0);
+    setMvpCount(0);
   };
 
   return (
@@ -248,6 +253,18 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
                     min="0"
                     value={saves}
                     onChange={(e) => setSaves(parseInt(e.target.value) || 0)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="mvpCount" className="text-foreground font-medium">⭐ Melhor da Partida</Label>
+                  <Input
+                    id="mvpCount"
+                    type="number"
+                    min="0"
+                    value={mvpCount}
+                    onChange={(e) => setMvpCount(parseInt(e.target.value) || 0)}
                     className="mt-1"
                   />
                 </div>

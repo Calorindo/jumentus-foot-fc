@@ -1,6 +1,7 @@
-import { ref, set, push, get } from "firebase/database";
+import { ref, set, push, get, update } from "firebase/database";
 import { database } from "@/lib/firebase";
 import type { Player } from "@/types/player";
+import { updatePlayerStats } from "./addPlayer";
 
 export interface MatchData {
   id: string;
@@ -18,6 +19,8 @@ export interface MatchData {
   endedAt: number;
   votes: Record<string, number>; // playerId -> vote count
   userVotes: Record<string, string>; // userId -> playerId voted for
+  votingFinalized?: boolean;
+  mvpWinner?: string;
 }
 
 export async function saveMatch(
@@ -102,4 +105,44 @@ export async function hasUserVoted(matchId: string, userId: string): Promise<boo
   const userVoteRef = ref(database, `matches/${matchId}/userVotes/${userId}`);
   const snapshot = await get(userVoteRef);
   return snapshot.exists();
+}
+
+export async function finalizeVoting(matchId: string): Promise<string | null> {
+  const match = await getMatch(matchId);
+  if (!match || !match.votes) return null;
+  
+  // Encontrar o jogador com mais votos
+  let maxVotes = 0;
+  let winnerId: string | null = null;
+  
+  Object.entries(match.votes).forEach(([playerId, votes]) => {
+    if (votes > maxVotes) {
+      maxVotes = votes;
+      winnerId = playerId;
+    }
+  });
+  
+  if (winnerId && maxVotes > 0) {
+    // Incrementar mvpCount do vencedor
+    const playerRef = ref(database, `players/${winnerId}`);
+    const playerSnapshot = await get(playerRef);
+    
+    if (playerSnapshot.exists()) {
+      const currentMvpCount = playerSnapshot.val().mvp_count || 0;
+      await update(playerRef, {
+        mvp_count: currentMvpCount + 1,
+        updated_at: Date.now()
+      });
+    }
+    
+    // Marcar votação como finalizada
+    await update(ref(database, `matches/${matchId}`), {
+      votingFinalized: true,
+      mvpWinner: winnerId
+    });
+    
+    return winnerId;
+  }
+  
+  return null;
 }

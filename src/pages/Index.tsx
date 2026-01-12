@@ -66,7 +66,8 @@ const Index = () => {
           active: player.active,
           goals: player.goals,
           assists: player.assists,
-          saves: player.saves
+          saves: player.saves,
+          mvp_count: player.mvpCount
         });
         setEditingPlayer(null);
         toast.success(`${player.name} atualizado!`);
