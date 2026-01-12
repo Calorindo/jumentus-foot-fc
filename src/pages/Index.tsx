@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useFirebaseData } from '@/hooks/useFirebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, permanentlyDeletePlayer, incrementPlayerGoal } from '@/services/addPlayer';
