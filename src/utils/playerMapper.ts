@@ -14,6 +14,7 @@ interface FirebasePlayer {
   height?: number;
   preferred_foot?: string;
   active: boolean;
+  linked_user_email?: string;
 }
 
 export function mapFirebaseToPlayer(data: FirebasePlayer): Player {
@@ -31,5 +32,6 @@ export function mapFirebaseToPlayer(data: FirebasePlayer): Player {
     height: data.height,
     preferredFoot: data.preferred_foot as any,
     active: data.active ?? true,
+    linkedUserEmail: data.linked_user_email,
   };
 }

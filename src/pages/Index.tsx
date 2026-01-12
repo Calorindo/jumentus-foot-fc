@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useFirebaseData } from '@/hooks/useFirebase';
 import { useAuth } from '@/contexts/AuthContext';
-import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, incrementPlayerGoal } from '@/services/addPlayer';
+import { createPlayer, updatePlayerStats, deletePlayer as deletePlayerFromDB, permanentlyDeletePlayer, incrementPlayerGoal } from '@/services/addPlayer';
 import { reactivatePlayer } from '@/services/reactivatePlayer';
 import { saveMatch } from '@/services/matchService';
 import { mapFirebaseToPlayer } from '@/utils/playerMapper';
@@ -67,7 +67,8 @@ const Index = () => {
           goals: player.goals,
           assists: player.assists,
           saves: player.saves,
-          mvp_count: player.mvpCount
+          mvp_count: player.mvpCount,
+          linked_user_email: player.linkedUserEmail
         });
         setEditingPlayer(null);
         toast.success(`${player.name} atualizado!`);
@@ -108,6 +109,23 @@ const Index = () => {
         toast.success(`${player?.name} reativado!`);
       } catch (error) {
         toast.error('Erro ao reativar jogador');
+      }
+    },
+    [allPlayers, isAdmin]
+  );
+
+  const handlePermanentDelete = useCallback(
+    async (id: string) => {
+      if (!isAdmin) {
+        toast.error('Apenas administradores podem excluir jogadores');
+        return;
+      }
+      try {
+        const player = allPlayers.find((p) => p.id === id);
+        await permanentlyDeletePlayer(id);
+        toast.success(`${player?.name} excluído permanentemente!`);
+      } catch (error) {
+        toast.error('Erro ao excluir jogador');
       }
     },
     [allPlayers, isAdmin]
@@ -290,6 +308,7 @@ const Index = () => {
                 players={allPlayers}
                 onEdit={setEditingPlayer}
                 onDelete={deletePlayer}
+                onPermanentDelete={handlePermanentDelete}
                 onReactivate={handleReactivatePlayer}
                 showActions={isAdmin}
               />

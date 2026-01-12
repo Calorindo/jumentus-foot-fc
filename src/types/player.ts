@@ -15,6 +15,7 @@ export interface Player {
   height?: number;
   preferredFoot?: PreferredFoot;
   active: boolean;
+  linkedUserEmail?: string;
 }
 
 export interface Team {

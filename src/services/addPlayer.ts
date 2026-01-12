@@ -14,6 +14,7 @@ export interface Player {
   weight?: number;
   height?: number;
   preferred_foot?: string;
+  linked_user_email?: string;
   created_at: number;
   updated_at: number;
   active: boolean;
@@ -115,4 +116,8 @@ export async function deletePlayer(playerId: string) {
     active: false,
     updated_at: now
   });
+}
+
+export async function permanentlyDeletePlayer(playerId: string) {
+  await set(ref(database, `players/${playerId}`), null);
 }

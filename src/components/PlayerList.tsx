@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2, Shield, Goal, RotateCcw, Search } from 'lucide-react';
+import { Pencil, Trash2, Shield, Goal, RotateCcw, Search, X } from 'lucide-react';
 import type { Player } from '@/types/player';
 
 interface PlayerListProps {
   players: Player[];
   onEdit: (player: Player) => void;
   onDelete: (id: string) => void;
+  onPermanentDelete?: (id: string) => void;
   onReactivate?: (id: string) => void;
   selectable?: boolean;
   selectedIds?: string[];
@@ -20,6 +21,7 @@ const PlayerList = ({
   players,
   onEdit,
   onDelete,
+  onPermanentDelete,
   onReactivate,
   selectable = false,
   selectedIds = [],
@@ -95,6 +97,11 @@ const PlayerList = ({
                 {player.position === 'Atacante' && '⚽'}
                 {' '}{player.position}
               </Badge>
+              {player.linkedUserEmail && (
+                <Badge variant="outline" className="text-xs border-green-500 text-green-600">
+                  🔗 Vinculado
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -118,18 +125,36 @@ const PlayerList = ({
           {!selectable && showActions && (
             <div className="flex gap-1">
               {player.active === false ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onReactivate?.(player.id);
-                  }}
-                  className="h-8 w-8 text-muted-foreground hover:text-green-600"
-                  title="Reativar jogador"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReactivate?.(player.id);
+                    }}
+                    className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                    title="Reativar jogador"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
+                  {onPermanentDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Tem certeza que deseja excluir permanentemente ${player.name}? Esta ação não pode ser desfeita.`)) {
+                          onPermanentDelete(player.id);
+                        }
+                      }}
+                      className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                      title="Excluir permanentemente"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </>
               ) : (
                 <>
                   <Button

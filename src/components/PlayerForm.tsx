@@ -5,8 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { UserPlus, Check, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useFirebaseData } from '@/hooks/useFirebase';
+import { cn } from '@/lib/utils';
 import type { Player, PlayerPosition, PreferredFoot } from '@/types/player';
 
 interface PlayerFormProps {
@@ -17,7 +21,16 @@ interface PlayerFormProps {
 }
 
 const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }: PlayerFormProps) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
+  const { data: usersData } = useFirebaseData<Record<string, any>>('users');
+  const [emailDropdownOpen, setEmailDropdownOpen] = useState(false);
+  
+  // Verificar se o usuário pode editar este jogador
+  const canEditPlayer = isAdmin || (editingPlayer?.linkedUserEmail === user?.email);
+  const isLinkedUser = editingPlayer?.linkedUserEmail === user?.email && !isAdmin;
+  
+  // Lista de emails dos usuários cadastrados
+  const userEmails = usersData ? Object.values(usersData).map((userData: any) => userData.email).filter(Boolean) : [];
   const [name, setName] = useState('');
   const [skillLevel, setSkillLevel] = useState(5);
   const [isGoalkeeper, setIsGoalkeeper] = useState(false);
@@ -30,6 +43,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
   const [assists, setAssists] = useState(0);
   const [saves, setSaves] = useState(0);
   const [mvpCount, setMvpCount] = useState(0);
+  const [linkedUserEmail, setLinkedUserEmail] = useState('');
 
   useEffect(() => {
     if (editingPlayer) {
@@ -45,6 +59,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setAssists(editingPlayer.assists);
       setSaves(editingPlayer.saves);
       setMvpCount(editingPlayer.mvpCount || 0);
+      setLinkedUserEmail(editingPlayer.linkedUserEmail || '');
     } else {
       setName('');
       setSkillLevel(5);
@@ -58,6 +73,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
       setAssists(0);
       setSaves(0);
       setMvpCount(0);
+      setLinkedUserEmail('');
     }
   }, [editingPlayer]);
 
@@ -66,20 +82,26 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     if (!name.trim()) return;
 
     if (editingPlayer && onUpdatePlayer) {
+      if (!canEditPlayer) {
+        toast.error('Você não tem permissão para editar este jogador');
+        return;
+      }
+      
       onUpdatePlayer({
         ...editingPlayer,
         name: name.trim(),
-        skillLevel,
-        isGoalkeeper,
-        position,
+        skillLevel: isLinkedUser ? editingPlayer.skillLevel : skillLevel,
+        isGoalkeeper: isLinkedUser ? editingPlayer.isGoalkeeper : isGoalkeeper,
+        position: position,
         weight,
         height,
         preferredFoot,
-        active: isActive,
-        goals,
-        assists,
-        saves,
-        mvpCount,
+        active: isLinkedUser ? editingPlayer.active : isActive,
+        goals: isLinkedUser ? editingPlayer.goals : goals,
+        assists: isLinkedUser ? editingPlayer.assists : assists,
+        saves: isLinkedUser ? editingPlayer.saves : saves,
+        mvpCount: isLinkedUser ? editingPlayer.mvpCount : mvpCount,
+        linkedUserEmail: isLinkedUser ? editingPlayer.linkedUserEmail : (linkedUserEmail.trim() || undefined),
       });
     } else {
       onAddPlayer({
@@ -105,6 +127,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
     setAssists(0);
     setSaves(0);
     setMvpCount(0);
+    setLinkedUserEmail('');
   };
 
   return (
@@ -122,8 +145,72 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
             onChange={(e) => setName(e.target.value)}
             placeholder="Digite o nome do jogador"
             className="mt-1"
+            disabled={isLinkedUser}
           />
         </div>
+
+        {isAdmin && (
+          <div>
+            <Label className="text-foreground font-medium">Email do Usuário Vinculado</Label>
+            <Popover open={emailDropdownOpen} onOpenChange={setEmailDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={emailDropdownOpen}
+                  className="w-full justify-between mt-1"
+                >
+                  {linkedUserEmail || "Selecionar email..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Buscar email..." />
+                  <CommandEmpty>Nenhum email encontrado.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      value=""
+                      onSelect={() => {
+                        setLinkedUserEmail('');
+                        setEmailDropdownOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          linkedUserEmail === '' ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      Nenhum usuário
+                    </CommandItem>
+                    {userEmails.map((email) => (
+                      <CommandItem
+                        key={email}
+                        value={email}
+                        onSelect={(currentValue) => {
+                          setLinkedUserEmail(currentValue === linkedUserEmail ? '' : currentValue);
+                          setEmailDropdownOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            linkedUserEmail === email ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {email}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <p className="text-xs text-muted-foreground mt-1">
+              Usuário poderá editar peso, altura e posição
+            </p>
+          </div>
+        )}
 
         <div>
           <Label className="text-foreground font-medium">
@@ -137,6 +224,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
               max={10}
               step={1}
               className="cursor-pointer"
+              disabled={isLinkedUser}
             />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -216,6 +304,7 @@ const PlayerForm = ({ onAddPlayer, editingPlayer, onUpdatePlayer, onCancelEdit }
                 id="active"
                 checked={isActive}
                 onCheckedChange={setIsActive}
+                disabled={isLinkedUser}
               />
             </div>
 
