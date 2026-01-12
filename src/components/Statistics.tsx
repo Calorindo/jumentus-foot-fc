@@ -52,11 +52,11 @@ const Statistics = ({ players }: StatisticsProps) => {
             <div className="card-elevated p-6 text-center gradient-primary text-primary-foreground">
               <Trophy className="w-10 h-10 mx-auto mb-2 text-gold" />
               <p className="text-sm opacity-80">Artilheiro</p>
-              <h3 className="font-display text-2xl mt-1">{topScorer.name}</h3>
-              <Badge className="mt-2 bg-gold text-foreground">
-                <Goal className="w-4 h-4 mr-1" />
+              <h3 className="font-display text-2xl mt-1 text-white">{topScorer.name}</h3>
+              <div className="mt-2 bg-gold text-white font-bold px-3 py-1 rounded-full inline-flex items-center gap-1">
+                <Goal className="w-4 h-4" />
                 {topScorer.goals} gols
-              </Badge>
+              </div>
             </div>
           )}
 
@@ -103,11 +103,11 @@ const Statistics = ({ players }: StatisticsProps) => {
               <span
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                   index === 0
-                    ? 'bg-gold text-foreground'
+                    ? 'bg-gold text-black'
                     : index === 1
-                    ? 'bg-muted-foreground/30 text-foreground'
+                    ? 'bg-gray-400 text-black'
                     : index === 2
-                    ? 'bg-burgundy-light text-primary-foreground'
+                    ? 'bg-amber-600 text-white'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -136,11 +136,11 @@ const Statistics = ({ players }: StatisticsProps) => {
               <span
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                   index === 0
-                    ? 'bg-gold text-foreground'
+                    ? 'bg-gold text-black'
                     : index === 1
-                    ? 'bg-muted-foreground/30 text-foreground'
+                    ? 'bg-gray-400 text-black'
                     : index === 2
-                    ? 'bg-burgundy-light text-primary-foreground'
+                    ? 'bg-amber-600 text-white'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -171,7 +171,7 @@ const Statistics = ({ players }: StatisticsProps) => {
                 <span
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
                     index === 0
-                      ? 'bg-gold text-foreground'
+                      ? 'bg-gold text-black'
                       : 'bg-muted text-muted-foreground'
                   }`}
                 >
