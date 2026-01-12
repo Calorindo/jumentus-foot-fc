@@ -13,6 +13,7 @@ import PlayerList from '@/components/PlayerList';
 import TeamBuilder from '@/components/TeamBuilder';
 import MatchControl from '@/components/MatchControl';
 import MatchVoting from '@/components/MatchVoting';
+import UserManagement from '@/components/UserManagement';
 import Statistics from '@/components/Statistics';
 import { toast } from 'sonner';
 import type { Player, Team } from '@/types/player';
@@ -267,6 +268,7 @@ const Index = () => {
         onTabChange={setActiveTab}
         matchActive={!!currentMatch}
         votingActive={true}
+        isAdmin={isAdmin}
       />
 
       <main className="container mx-auto py-4 sm:py-6 px-4">
@@ -314,6 +316,8 @@ const Index = () => {
         {activeTab === 'stats' && <Statistics players={activePlayers} />}
 
         {activeTab === 'voting' && <MatchVoting />}
+
+        {activeTab === 'users' && <UserManagement />}
       </main>
     </div>
   );

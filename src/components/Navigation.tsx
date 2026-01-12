@@ -1,20 +1,22 @@
 import { Button } from '@/components/ui/button';
-import { Users, Shuffle, Gamepad2, BarChart3, Award } from 'lucide-react';
+import { Users, Shuffle, Gamepad2, BarChart3, Award, UserCog } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   matchActive: boolean;
   votingActive?: boolean;
+  isAdmin?: boolean;
 }
 
-const Navigation = ({ activeTab, onTabChange, matchActive, votingActive = false }: NavigationProps) => {
+const Navigation = ({ activeTab, onTabChange, matchActive, votingActive = false, isAdmin = false }: NavigationProps) => {
   const tabs = [
     { id: 'players', label: 'Jogadores', icon: Users },
     { id: 'teams', label: 'Times', icon: Shuffle },
     { id: 'match', label: 'Partida', icon: Gamepad2, disabled: !matchActive },
     { id: 'voting', label: 'Votação', icon: Award },
     { id: 'stats', label: 'Estatísticas', icon: BarChart3 },
+    { id: 'users', label: 'Usuários', icon: UserCog, hidden: !isAdmin },
   ];
 
   return (
