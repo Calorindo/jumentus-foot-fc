@@ -8,6 +8,7 @@ export interface Player {
   goals: number;
   assists: number;
   saves: number;
+  tackles?: number;
   mvp_count?: number;
   is_goalkeeper: boolean;
   position: string;
@@ -52,6 +53,7 @@ export async function createPlayer(
     goals: 0,
     assists: 0,
     saves: 0,
+    tackles: 0,
     mvp_count: 0,
     is_goalkeeper: is_goalkeeper,
     position: position,

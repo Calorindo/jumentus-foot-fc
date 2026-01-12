@@ -8,6 +8,7 @@ export interface Player {
   goals: number;
   assists: number;
   saves: number;
+  tackles: number;
   mvpCount: number;
   isGoalkeeper: boolean;
   position: PlayerPosition;

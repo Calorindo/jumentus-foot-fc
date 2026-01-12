@@ -74,8 +74,9 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
 
     const newTeamA: Player[] = [];
     const newTeamB: Player[] = [];
+    const playersPerTeam = Math.floor(selected.length / 2);
 
-    // Distribute goalkeepers
+    // Distribute goalkeepers first
     if (goalkeepers.length >= 2) {
       const sortedGK = [...goalkeepers].sort((a, b) => calculatePlayerScore(b) - calculatePlayerScore(a));
       sortedGK.forEach((gk, index) => {
@@ -84,25 +85,35 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
       });
     }
 
-    // Distribute by position to balance team composition
-    const distributeByPosition = (positionPlayers: Player[]) => {
-      const sorted = [...positionPlayers].sort((a, b) => calculatePlayerScore(b) - calculatePlayerScore(a));
-      sorted.forEach((player) => {
+    // Combine all non-goalkeeper players and sort by score
+    const fieldPlayers = [...defenders, ...midfielders, ...attackers]
+      .sort((a, b) => calculatePlayerScore(b) - calculatePlayerScore(a));
+
+    // Distribute field players ensuring equal team sizes
+    fieldPlayers.forEach((player) => {
+      // Always prioritize equal team sizes first
+      if (newTeamA.length < playersPerTeam && newTeamB.length < playersPerTeam) {
+        // Both teams have space, choose based on score balance
         const scoreA = newTeamA.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
         const scoreB = newTeamB.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
         
         if (scoreA <= scoreB) newTeamA.push(player);
         else newTeamB.push(player);
-      });
-    };
-
-    distributeByPosition(defenders);
-    distributeByPosition(midfielders);
-    distributeByPosition(attackers);
-
-    // Balance preferred foot
-    const leftFootA = newTeamA.filter(p => p.preferredFoot === 'Esquerdo').length;
-    const leftFootB = newTeamB.filter(p => p.preferredFoot === 'Esquerdo').length;
+      } else if (newTeamA.length < playersPerTeam) {
+        // Only team A has space
+        newTeamA.push(player);
+      } else if (newTeamB.length < playersPerTeam) {
+        // Only team B has space
+        newTeamB.push(player);
+      } else {
+        // Both teams are at target size, distribute remaining players
+        const scoreA = newTeamA.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
+        const scoreB = newTeamB.reduce((sum, p) => sum + calculatePlayerScore(p), 0);
+        
+        if (scoreA <= scoreB) newTeamA.push(player);
+        else newTeamB.push(player);
+      }
+    });
 
     const gkInA = newTeamA.filter(p => p.isGoalkeeper).length;
     const gkInB = newTeamB.filter(p => p.isGoalkeeper).length;
