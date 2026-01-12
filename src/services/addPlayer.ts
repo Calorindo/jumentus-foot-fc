@@ -89,6 +89,7 @@ export async function updatePlayerStats(playerId: string, stats: Partial<Player>
     updated_at: now
   };
   
+  // Mapear os campos corretamente
   Object.keys(stats).forEach((key) => {
     const value = stats[key as keyof Player];
     if (value !== undefined && value !== null) {
@@ -96,7 +97,14 @@ export async function updatePlayerStats(playerId: string, stats: Partial<Player>
     }
   });
   
-  await update(ref(database, `players/${playerId}`), cleanStats);
+  console.log('Updating player stats:', playerId, cleanStats);
+  
+  try {
+    await update(ref(database, `players/${playerId}`), cleanStats);
+  } catch (error) {
+    console.error('Firebase update error:', error);
+    throw error;
+  }
 }
 
 export async function deletePlayer(playerId: string) {

@@ -71,6 +71,7 @@ const Index = () => {
         setEditingPlayer(null);
         toast.success(`${player.name} atualizado!`);
       } catch (error) {
+        console.error('Erro ao atualizar jogador:', error);
         toast.error('Erro ao atualizar jogador');
       }
     },
