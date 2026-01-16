@@ -58,36 +58,54 @@ export async function saveMatch(
   return matchId;
 }
 
+let isCreatingMatch = false;
+
 export async function createActiveMatch(
   teamAName: string,
   teamAPlayers: Player[],
   teamBName: string,
   teamBPlayers: Player[]
 ): Promise<string> {
-  const newMatchRef = push(ref(database, 'matches'));
-  const matchId = newMatchRef.key!;
-  const now = Date.now();
+  if (isCreatingMatch) {
+    throw new Error('Já existe uma partida sendo criada');
+  }
+  
+  isCreatingMatch = true;
+  
+  try {
+    // Verificar se já existe uma partida ativa
+    const existingMatch = await getActiveMatch();
+    if (existingMatch) {
+      throw new Error('Já existe uma partida ativa');
+    }
+    
+    const newMatchRef = push(ref(database, 'matches'));
+    const matchId = newMatchRef.key!;
+    const now = Date.now();
 
-  await set(newMatchRef, {
-    id: matchId,
-    teamA: {
-      name: teamAName,
-      score: 0,
-      playerIds: teamAPlayers.map(p => p.id)
-    },
-    teamB: {
-      name: teamBName,
-      score: 0,
-      playerIds: teamBPlayers.map(p => p.id)
-    },
-    startedAt: now,
-    endedAt: 0,
-    isActive: true,
-    votes: {},
-    userVotes: {}
-  });
+    await set(newMatchRef, {
+      id: matchId,
+      teamA: {
+        name: teamAName,
+        score: 0,
+        playerIds: teamAPlayers.map(p => p.id)
+      },
+      teamB: {
+        name: teamBName,
+        score: 0,
+        playerIds: teamBPlayers.map(p => p.id)
+      },
+      startedAt: now,
+      endedAt: 0,
+      isActive: true,
+      votes: {},
+      userVotes: {}
+    });
 
-  return matchId;
+    return matchId;
+  } finally {
+    isCreatingMatch = false;
+  }
 }
 
 export async function getMatch(matchId: string): Promise<MatchData | null> {

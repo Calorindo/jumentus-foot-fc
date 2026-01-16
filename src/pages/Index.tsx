@@ -28,8 +28,12 @@ const Index = () => {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [currentMatch, setCurrentMatch] = useState<{ teamA: Team; teamB: Team; id?: string } | null>(null);
 
-  // Buscar partida ativa ao carregar
+  // Buscar partida ativa ao carregar (apenas uma vez)
+  const [hasLoadedMatch, setHasLoadedMatch] = useState(false);
+  
   useEffect(() => {
+    if (hasLoadedMatch || allPlayers.length === 0) return;
+    
     const loadActiveMatch = async () => {
       try {
         const activeMatch = await getActiveMatch();
@@ -54,13 +58,13 @@ const Index = () => {
         }
       } catch (error) {
         console.error('Erro ao carregar partida ativa:', error);
+      } finally {
+        setHasLoadedMatch(true);
       }
     };
     
-    if (allPlayers.length > 0) {
-      loadActiveMatch();
-    }
-  }, [allPlayers]);
+    loadActiveMatch();
+  }, [allPlayers.length, hasLoadedMatch]);
 
   const addPlayer = useCallback(
     async (playerData: Omit<Player, 'id' | 'goals' | 'saves'>) => {
@@ -172,8 +176,13 @@ const Index = () => {
       setCurrentMatch({ teamA, teamB, id: matchId });
       setActiveTab('match');
       toast.success('Partida iniciada! Boa pelada! ⚽');
-    } catch (error) {
-      toast.error('Erro ao criar partida');
+    } catch (error: any) {
+      console.error('Erro ao criar partida:', error);
+      if (error.message?.includes('Já existe')) {
+        toast.error(error.message);
+      } else {
+        toast.error('Erro ao criar partida. Tente novamente.');
+      }
     }
   }, []);
 

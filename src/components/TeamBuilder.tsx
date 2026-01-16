@@ -27,6 +27,7 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
   const [teamB, setTeamB] = useState<Player[]>([]);
   const [showGoalkeeperAlert, setShowGoalkeeperAlert] = useState(false);
   const [pendingTeams, setPendingTeams] = useState<{ teamA: Player[], teamB: Player[] } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -59,8 +60,12 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
   };
 
   const balanceTeams = () => {
-    const selected = players.filter((p) => selectedIds.includes(p.id));
-    if (selected.length < 2) return;
+    if (isProcessing) return;
+    setIsProcessing(true);
+    
+    try {
+      const selected = players.filter((p) => selectedIds.includes(p.id));
+      if (selected.length < 2) return;
 
     const goalkeepers = selected.filter(p => p.isGoalkeeper);
     const defenders = selected.filter(p => p.position === 'Zagueiro');
@@ -125,6 +130,9 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
       setTeamA(newTeamA);
       setTeamB(newTeamB);
     }
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const confirmTeamsWithoutGoalkeeper = () => {
@@ -137,23 +145,35 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
   };
 
   const shuffleTeams = () => {
-    const selected = players.filter((p) => selectedIds.includes(p.id));
-    if (selected.length < 2) return;
-
-    const shuffled = [...selected].sort(() => Math.random() - 0.5);
-    const mid = Math.ceil(shuffled.length / 2);
+    if (isProcessing) return;
+    setIsProcessing(true);
     
-    setTeamA(shuffled.slice(0, mid));
-    setTeamB(shuffled.slice(mid));
+    try {
+      const selected = players.filter((p) => selectedIds.includes(p.id));
+      if (selected.length < 2) return;
+
+      const shuffled = [...selected].sort(() => Math.random() - 0.5);
+      const mid = Math.ceil(shuffled.length / 2);
+      
+      setTeamA(shuffled.slice(0, mid));
+      setTeamB(shuffled.slice(mid));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const startMatch = () => {
-    if (teamA.length === 0 || teamB.length === 0) return;
-
-    onTeamsCreated(
-      { name: 'Time A', players: teamA, score: 0 },
-      { name: 'Time B', players: teamB, score: 0 }
-    );
+  const startMatch = async () => {
+    if (teamA.length === 0 || teamB.length === 0 || isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      await onTeamsCreated(
+        { name: 'Time A', players: teamA, score: 0 },
+        { name: 'Time B', players: teamB, score: 0 }
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const selectedPlayers = players.filter((p) => selectedIds.includes(p.id));
@@ -196,13 +216,13 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
 
       {selectedIds.length >= 2 && (
         <div className="flex flex-col sm:flex-row gap-2 justify-center">
-          <Button onClick={balanceTeams} className="btn-primary w-full sm:w-auto">
+          <Button onClick={balanceTeams} className="btn-primary w-full sm:w-auto" disabled={isProcessing}>
             <Sparkles className="w-4 h-4 mr-2" />
-            Equilibrar Times
+            {isProcessing ? 'Processando...' : 'Equilibrar Times'}
           </Button>
-          <Button onClick={shuffleTeams} variant="outline" className="w-full sm:w-auto">
+          <Button onClick={shuffleTeams} variant="outline" className="w-full sm:w-auto" disabled={isProcessing}>
             <Shuffle className="w-4 h-4 mr-2" />
-            Sortear
+            {isProcessing ? 'Processando...' : 'Sortear'}
           </Button>
         </div>
       )}
@@ -297,8 +317,8 @@ const TeamBuilder = ({ players, onTeamsCreated }: TeamBuilderProps) => {
       )}
 
       {teamA.length > 0 && teamB.length > 0 && (
-        <Button onClick={startMatch} className="w-full btn-gold py-6 text-lg font-display animate-pulse-gold">
-          ⚽ INICIAR PARTIDA
+        <Button onClick={startMatch} className="w-full btn-gold py-6 text-lg font-display" disabled={isProcessing}>
+          {isProcessing ? '⏳ INICIANDO...' : '⚽ INICIAR PARTIDA'}
         </Button>
       )}
 
