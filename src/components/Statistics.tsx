@@ -9,6 +9,7 @@ interface StatisticsProps {
 const Statistics = ({ players }: StatisticsProps) => {
   const sortedByGoals = [...players].sort((a, b) => b.goals - a.goals);
   const sortedByAssists = [...players].sort((a, b) => b.assists - a.assists);
+  const sortedByParticipations = [...players].sort((a, b) => (b.goals + b.assists) - (a.goals + a.assists));
   const sortedBySaves = [...players]
     .filter((p) => p.isGoalkeeper)
     .sort((a, b) => b.saves - a.saves);
@@ -153,6 +154,50 @@ const Statistics = ({ players }: StatisticsProps) => {
               </Badge>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Participations Ranking */}
+      <div className="card-elevated p-6">
+        <h3 className="font-display text-xl text-primary mb-4 flex items-center gap-2">
+          ⚡ Ranking de Participações em Gol
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">Gols + Assistências</p>
+        <div className="space-y-2">
+          {sortedByParticipations.slice(0, 10).map((player, index) => {
+            const participations = player.goals + player.assists;
+            if (participations === 0) return null;
+            
+            return (
+              <div
+                key={player.id}
+                className="flex items-center gap-3 p-3 bg-secondary rounded-lg"
+              >
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold ${
+                    index === 0
+                      ? 'bg-gold text-black'
+                      : index === 1
+                      ? 'bg-gray-400 text-black'
+                      : index === 2
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                <div className="flex-1">
+                  <span className="font-medium block">{player.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {player.goals}G + {player.assists}A
+                  </span>
+                </div>
+                <Badge variant="outline" className="font-bold">
+                  {participations}
+                </Badge>
+              </div>
+            );
+          })}
         </div>
       </div>
 

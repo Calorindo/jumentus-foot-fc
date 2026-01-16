@@ -367,14 +367,16 @@ const Index = () => {
 
       <main className="container mx-auto py-4 sm:py-6 px-4">
         {activeTab === 'players' && (
-          <div className="grid lg:grid-cols-[350px_1fr] gap-4 sm:gap-6">
-            <PlayerForm
-              onAddPlayer={addPlayer}
-              editingPlayer={editingPlayer}
-              onUpdatePlayer={updatePlayer}
-              onCancelEdit={() => setEditingPlayer(null)}
-            />
-            <div className="min-w-0">
+          <div className="grid lg:grid-cols-[1fr_2fr] gap-4 sm:gap-6">
+            <div className="order-2 lg:order-1">
+              <PlayerForm
+                onAddPlayer={addPlayer}
+                editingPlayer={editingPlayer}
+                onUpdatePlayer={updatePlayer}
+                onCancelEdit={() => setEditingPlayer(null)}
+              />
+            </div>
+            <div className="min-w-0 order-1 lg:order-2">
               <h2 className="font-display text-xl sm:text-2xl text-primary mb-4">
                 Jogadores Cadastrados ({allPlayers.length})
               </h2>

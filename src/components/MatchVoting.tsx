@@ -189,7 +189,7 @@ const MatchVoting = ({}: MatchVotingProps) => {
       )}
 
       <div className="card-elevated p-6">
-        <h3 className="font-display text-xl text-primary mb-4">Jogadores da Partida</h3>
+        <h3 className="font-display text-lg sm:text-xl text-primary mb-4">Jogadores da Partida</h3>
         <div className="space-y-2">
           {sortedByVotes.map((player) => {
             const votes = selectedMatch.votes?.[player.id] || 0;
@@ -198,11 +198,11 @@ const MatchVoting = ({}: MatchVotingProps) => {
             return (
               <div
                 key={player.id}
-                className="flex items-center justify-between p-3 bg-secondary rounded-lg"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 p-3 bg-secondary rounded-lg"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{player.name}</span>
+                <div className="flex-1 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm sm:text-base">{player.name}</span>
                     <Badge variant="outline" className={`text-xs ${isInTeamA ? 'border-primary' : 'border-gold'}`}>
                       {isInTeamA ? selectedMatch.teamA.name : selectedMatch.teamB.name}
                     </Badge>
@@ -218,9 +218,9 @@ const MatchVoting = ({}: MatchVotingProps) => {
                   size="sm"
                   onClick={() => handleVote(player.id)}
                   disabled={hasVoted || !votingOpen || selectedMatch.votingFinalized}
-                  className="bg-primary hover:bg-primary/80"
+                  className="bg-primary hover:bg-primary/80 w-full sm:w-auto text-xs sm:text-sm"
                 >
-                  <ThumbsUp className="w-4 h-4 mr-1" />
+                  <ThumbsUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   {selectedMatch.votingFinalized ? 'Finalizada' : hasVoted ? 'Votado' : 'Votar'}
                 </Button>
               </div>
@@ -231,14 +231,14 @@ const MatchVoting = ({}: MatchVotingProps) => {
 
       {isAdmin && !selectedMatch.votingFinalized && topVotes > 0 && (
         <div className="card-elevated p-4 bg-gold/5 border border-gold/20">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gold">Finalizar Votação</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex-1">
+              <p className="font-medium text-gold text-sm sm:text-base">Finalizar Votação</p>
               <p className="text-xs text-muted-foreground">Isso irá atualizar o MVP Count do vencedor</p>
             </div>
             <Button
               onClick={handleFinalizeVoting}
-              className="bg-gold hover:bg-gold/80 text-black"
+              className="bg-gold hover:bg-gold/80 text-black w-full sm:w-auto text-sm"
             >
               <Trophy className="w-4 h-4 mr-2" />
               Finalizar
@@ -273,32 +273,32 @@ const MatchVoting = ({}: MatchVotingProps) => {
               <div
                 key={match.id}
                 onClick={() => loadMatch(match.id)}
-                className="card-elevated p-4 cursor-pointer hover:bg-secondary/50 transition-colors"
+                className="card-elevated p-3 sm:p-4 cursor-pointer hover:bg-secondary/50 transition-colors"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-display text-lg">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="flex-1 w-full">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-display text-base sm:text-lg">
                         {match.teamA.name} {match.teamA.score} × {match.teamB.score} {match.teamB.name}
                       </span>
                       {votingOpen && (
-                        <Badge className="bg-green-500 text-xs">
+                        <Badge className="bg-green-500 text-xs whitespace-nowrap">
                           <Clock className="w-3 h-3 mr-1" />
                           Aberto
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>{formatDate(match.endedAt)}</span>
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-wrap">
+                      <span className="whitespace-nowrap">{formatDate(match.endedAt)}</span>
                       <span>•</span>
-                      <span>
+                      <span className="whitespace-nowrap">
                         <ThumbsUp className="w-3 h-3 inline mr-1" />
                         {totalVotes} {totalVotes === 1 ? 'voto' : 'votos'}
                       </span>
                       {votingOpen && (
                         <>
                           <span>•</span>
-                          <span>{getTimeRemaining(match)}</span>
+                          <span className="whitespace-nowrap">{getTimeRemaining(match)}</span>
                         </>
                       )}
                     </div>

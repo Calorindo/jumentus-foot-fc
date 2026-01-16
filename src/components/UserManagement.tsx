@@ -112,8 +112,8 @@ const UserManagement = () => {
       </div>
 
       {activeTab === 'pending' && (
-        <div className="card-elevated p-6">
-          <h3 className="font-display text-xl text-primary mb-4">
+        <div className="card-elevated p-4 sm:p-6">
+          <h3 className="font-display text-lg sm:text-xl text-primary mb-4">
             Usuários Pendentes de Aprovação
           </h3>
           
@@ -127,26 +127,27 @@ const UserManagement = () => {
               {pendingUsers.map((user) => (
                 <div
                   key={user.uid}
-                  className="flex items-center justify-between p-4 bg-secondary rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-secondary rounded-lg"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1 w-full">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{user.email}</span>
+                      <span className="font-medium text-sm sm:text-base break-all">{user.email}</span>
                       {user.isAdmin && (
-                        <Badge className="bg-gold text-foreground text-xs">
+                        <Badge className="bg-gold text-foreground text-xs whitespace-nowrap">
                           <Shield className="w-3 h-3 mr-1" />
                           Admin
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Cadastrado em: {formatDate(user.createdAt)}
                     </p>
                   </div>
                   <Button
                     onClick={() => handleApprove(user.uid)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto text-sm"
+                    size="sm"
                   >
                     <UserCheck className="w-4 h-4 mr-2" />
                     Aprovar
@@ -159,8 +160,8 @@ const UserManagement = () => {
       )}
 
       {activeTab === 'all' && (
-        <div className="card-elevated p-6">
-          <h3 className="font-display text-xl text-primary mb-4">
+        <div className="card-elevated p-4 sm:p-6">
+          <h3 className="font-display text-lg sm:text-xl text-primary mb-4">
             Todos os Usuários
           </h3>
           
@@ -168,48 +169,48 @@ const UserManagement = () => {
             {allUsers.map((user) => (
               <div
                 key={user.uid}
-                className="flex items-center justify-between p-4 bg-secondary rounded-lg"
+                className="p-3 sm:p-4 bg-secondary rounded-lg"
               >
                 {editingUser?.uid === user.uid ? (
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{user.email}</span>
+                      <span className="font-medium text-sm sm:text-base break-all">{user.email}</span>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between p-2 bg-background rounded">
+                        <span className="text-sm">Administrador</span>
                         <Switch
                           checked={editingUser.isAdmin}
                           onCheckedChange={(checked) => 
                             setEditingUser({...editingUser, isAdmin: checked})
                           }
                         />
-                        <span className="text-sm">Administrador</span>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between p-2 bg-background rounded">
+                        <span className="text-sm">Aprovado</span>
                         <Switch
                           checked={editingUser.trusted}
                           onCheckedChange={(checked) => 
                             setEditingUser({...editingUser, trusted: checked})
                           }
                         />
-                        <span className="text-sm">Aprovado</span>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between p-2 bg-background rounded">
+                        <span className="text-sm">Ativo</span>
                         <Switch
                           checked={editingUser.active !== false}
                           onCheckedChange={(checked) => 
                             setEditingUser({...editingUser, active: checked})
                           }
                         />
-                        <span className="text-sm">Ativo</span>
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         size="sm"
                         onClick={() => handleUpdateUser(user.uid, {
@@ -217,7 +218,7 @@ const UserManagement = () => {
                           trusted: editingUser.trusted,
                           active: editingUser.active
                         })}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 w-full sm:flex-1"
                       >
                         Salvar
                       </Button>
@@ -225,25 +226,26 @@ const UserManagement = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => setEditingUser(null)}
+                        className="w-full sm:flex-1"
                       >
                         Cancelar
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex-1 w-full">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium">{user.email}</span>
+                        <span className="font-medium text-sm sm:text-base break-all">{user.email}</span>
                         {user.isAdmin && (
-                          <Badge className="bg-gold text-foreground text-xs">
+                          <Badge className="bg-gold text-foreground text-xs whitespace-nowrap">
                             <Shield className="w-3 h-3 mr-1" />
                             Admin
                           </Badge>
                         )}
                         <Badge 
-                          className={`text-xs ${
+                          className={`text-xs whitespace-nowrap ${
                             user.trusted 
                               ? 'bg-green-500 text-white' 
                               : 'bg-orange-500 text-white'
@@ -252,13 +254,13 @@ const UserManagement = () => {
                           {user.trusted ? 'Aprovado' : 'Pendente'}
                         </Badge>
                         {user.active === false && (
-                          <Badge className="bg-red-500 text-white text-xs">
+                          <Badge className="bg-red-500 text-white text-xs whitespace-nowrap">
                             <UserX className="w-3 h-3 mr-1" />
                             Inativo
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Cadastrado em: {formatDate(user.createdAt)}
                       </p>
                     </div>
@@ -266,11 +268,12 @@ const UserManagement = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => setEditingUser(user)}
+                      className="w-full sm:w-auto"
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Editar
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             ))}

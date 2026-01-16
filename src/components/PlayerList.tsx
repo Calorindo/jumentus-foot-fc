@@ -60,8 +60,16 @@ const PlayerList = ({
           placeholder="Buscar jogador..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 pr-10"
         />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
       
       {filteredPlayers.length === 0 ? (
@@ -73,7 +81,7 @@ const PlayerList = ({
           {filteredPlayers.map((player, index) => (
         <div
           key={player.id}
-          className={`card-elevated p-4 flex items-center gap-4 animate-slide-up transition-all ${
+          className={`card-elevated p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 animate-slide-up transition-all ${
             selectable && selectedIds.includes(player.id)
               ? 'ring-2 ring-primary bg-secondary'
               : ''
@@ -85,12 +93,12 @@ const PlayerList = ({
           style={{ animationDelay: `${index * 50}ms` }}
           onClick={() => selectable && player.active !== false && onToggleSelect?.(player.id)}
         >
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground truncate">
+          <div className="flex-1 min-w-0 w-full">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-foreground text-sm sm:text-base truncate">
                 {player.name}
               </span>
-              <Badge variant="outline" className="text-xs border-primary text-primary">
+              <Badge variant="outline" className="text-xs border-primary text-primary whitespace-nowrap">
                 {player.position === 'Goleiro' && '🧤'}
                 {player.position === 'Zagueiro' && '🛡️'}
                 {player.position === 'Meio Campo' && '⚙️'}
@@ -98,12 +106,12 @@ const PlayerList = ({
                 {' '}{player.position}
               </Badge>
               {player.linkedUserEmail && (
-                <Badge variant="outline" className="text-xs border-green-500 text-green-600">
+                <Badge variant="outline" className="text-xs border-green-500 text-green-600 whitespace-nowrap">
                   🔗 Vinculado
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1">
                 <Goal className="w-3 h-3" /> {player.goals}
               </span>
@@ -118,71 +126,73 @@ const PlayerList = ({
             </div>
           </div>
 
-          <Badge className={`${getSkillColor(player.skillLevel)} font-bold`}>
-            {player.skillLevel}
-          </Badge>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <Badge className={`${getSkillColor(player.skillLevel)} font-bold text-sm`}>
+              {player.skillLevel}
+            </Badge>
 
-          {!selectable && showActions && (
-            <div className="flex gap-1">
-              {player.active === false ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReactivate?.(player.id);
-                    }}
-                    className="h-8 w-8 text-muted-foreground hover:text-green-600"
-                    title="Reativar jogador"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </Button>
-                  {onPermanentDelete && (
+            {!selectable && showActions && (
+              <div className="flex gap-1">
+                {player.active === false ? (
+                  <>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (window.confirm(`Tem certeza que deseja excluir permanentemente ${player.name}? Esta ação não pode ser desfeita.`)) {
-                          onPermanentDelete(player.id);
-                        }
+                        onReactivate?.(player.id);
                       }}
-                      className="h-8 w-8 text-muted-foreground hover:text-red-600"
-                      title="Excluir permanentemente"
+                      className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                      title="Reativar jogador"
                     >
-                      <X className="w-4 h-4" />
+                      <RotateCcw className="w-4 h-4" />
                     </Button>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(player);
-                    }}
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(player.id);
-                    }}
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+                    {onPermanentDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Tem certeza que deseja excluir permanentemente ${player.name}? Esta ação não pode ser desfeita.`)) {
+                            onPermanentDelete(player.id);
+                          }
+                        }}
+                        className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                        title="Excluir permanentemente"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(player);
+                      }}
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(player.id);
+                      }}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
           ))}
         </div>
